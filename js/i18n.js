@@ -175,14 +175,34 @@ const I18N={
     document.querySelectorAll('input[name="lang"]').forEach(input=>{input.checked=input.value===this.lang});
   },
   applyHelpPages(){
-    document.querySelectorAll('.helpText').forEach(el=>{
-      const index=Number(el.closest('.helpPage')?.dataset.helpPage??0);
-      el.innerHTML=this.pageText(index).map(text=>`<p>${text}</p>`).join('');
-    });
+    const first=document.querySelector('[data-help-page="0"] .helpText');
+    if(first){
+      first.innerHTML=this.pageText(0).map((text,index)=>`
+        <div class="helpStep">
+          <p>${text}</p>
+          ${this.helpFigure(index)}
+        </div>
+      `).join('');
+    }
     document.querySelectorAll('.helpPage:not(:first-child) .helpBody').forEach(el=>{
       const index=Number(el.closest('.helpPage')?.dataset.helpPage??0);
       el.innerHTML=this.pageText(index).map(text=>`<p>${text}</p>`).join('');
     });
+  },
+  helpFigure(index){
+    if(index===0){
+      return '<div class="helpStepFigure helpDepthMini"><b>DEPTH</b><span></span><i></i><em>5m</em></div>';
+    }
+    if(index===1){
+      return '<div class="helpStepFigure helpAimMini"><button type="button">&lt;</button><button type="button">&gt;</button></div>';
+    }
+    if(index===2||index===3){
+      return '<div class="helpStepFigure helpCastIcon"><span class="helpCastArc"></span></div>';
+    }
+    if(index===4){
+      return '<div class="helpStepFigure helpHitIcon"><div class="helpCastIcon"><span class="helpCastArc"></span></div><strong>HIT!!</strong></div>';
+    }
+    return '<span class="helpStepFigure"></span>';
   }
 };
 

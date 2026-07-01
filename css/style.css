@@ -142,3 +142,45 @@ html,body,#wrap{-webkit-touch-callout:none;-webkit-user-select:none;user-select:
   .optionRadio{margin-left:34px}
   .optionRadio input{width:26px;height:26px}
 }
+
+.helpBodyWithFigures{display:block!important}
+.helpBodyWithFigures>.helpFigures{display:none!important}
+.helpBodyWithFigures .helpText{display:grid;gap:8px}
+.helpStep{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;min-height:48px}
+.helpStep p{min-width:0;margin:0;font-size:clamp(15px,3.85vw,21px);line-height:1.48;overflow-wrap:anywhere}
+.helpStepFigure{justify-self:end;flex:none}
+.helpStep .helpDepthMini{width:42px;height:132px;font-size:11px;padding:4px}
+.helpStep .helpDepthMini span{top:25px;height:82px;width:11px}
+.helpStep .helpDepthMini i{top:61px;left:7px;right:7px}
+.helpStep .helpDepthMini em{font-size:10px}
+.helpStep .helpAimMini{display:flex;gap:4px}
+.helpStep .helpAimMini button{width:42px;height:42px;padding:0;border-radius:7px;font-size:22px}
+.helpCastIcon{position:relative;width:74px;height:74px;border-radius:50%;background:rgba(238,238,238,.92) url("../images/cast_button.png") center/88% 88% no-repeat;border:3px solid #fff;box-shadow:0 3px 0 rgba(0,0,0,.45);image-rendering:pixelated}
+.helpCastArc{position:absolute;left:8px;right:8px;top:8px;bottom:8px;border-top:7px solid #54e67a;border-radius:50%;transform:rotate(-12deg)}
+.helpHitIcon{position:relative;width:82px;height:94px}
+.helpHitIcon .helpCastIcon{position:absolute;left:4px;bottom:0}
+.helpHitIcon strong{position:absolute;left:50%;top:2px;transform:translateX(-50%);padding:3px 7px;border:2px solid #fff;background:#c6241f;color:#fff;font-size:15px;line-height:1;box-shadow:0 0 8px #fff06a;white-space:nowrap}
+html[lang="en"] .helpStep p{font-size:clamp(14px,3.6vw,19px);line-height:1.42}
+@media(max-width:420px){
+  .helpBodyWithFigures .helpText{gap:7px}
+  .helpStep{grid-template-columns:minmax(0,1fr) 68px;gap:6px;min-height:45px}
+  .helpStep p{font-size:clamp(14px,3.75vw,18px);line-height:1.42}
+  .helpStep .helpDepthMini{width:38px;height:112px;font-size:10px}
+  .helpStep .helpDepthMini span{height:66px}
+  .helpStep .helpDepthMini i{top:54px}
+  .helpStep .helpAimMini button{width:31px;height:35px;font-size:18px}
+  .helpCastIcon{width:62px;height:62px}
+  .helpHitIcon{width:68px;height:78px}
+  .helpHitIcon strong{font-size:12px}
+  html[lang="en"] .helpStep p{font-size:clamp(13px,3.45vw,16px);line-height:1.34}
+}
+@media(max-height:680px){
+  .helpBodyWithFigures .helpText{gap:5px}
+  .helpStep{min-height:38px}
+  .helpStep p{font-size:clamp(13px,3.6vh,17px);line-height:1.32}
+  .helpStep .helpDepthMini{height:94px}
+  .helpStep .helpDepthMini span{height:52px}
+  .helpStep .helpDepthMini i{top:48px}
+  .helpCastIcon{width:56px;height:56px}
+  .helpHitIcon{height:70px}
+}
