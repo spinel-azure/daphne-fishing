@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Daphne Fishing(MVP)</title>
-<link rel="stylesheet" href="css/style.css?v=20260701-rodfix1">
+<link rel="stylesheet" href="css/style.css?v=20260701-help1">
 </head>
 <body>
 <div id="wrap">
@@ -35,6 +35,54 @@
       </nav>
     </div>
     <p class="saveNotice">セーブデータはこのブラウザに自動保存されます。<br>ブラウザのキャッシュやサイトデータを削除すると、セーブデータが消える場合があります。</p>
+  </section>
+
+  <section id="helpScene" class="helpScene is-hidden" aria-label="How to play">
+    <div class="helpPanel">
+      <h1 class="helpTitle">あそびかた</h1>
+
+      <article class="helpPage is-active" data-help-page="0">
+        <div class="helpBody helpBodyWithFigures">
+          <div class="helpText">
+            <p>① 深度ゲージを直接クリックまたはタップして深度を選びます。</p>
+            <p>② 左右ボタンをクリックまたはタップして釣り竿の向きを変えます。</p>
+            <p>③ キャストボタンを長押しするとキャストゲージが上がります。</p>
+            <p>ゲージが多いほど遠くに飛びますが、最大まで上がると力みすぎて近くに落としてしまいます。</p>
+            <p>④ 魚がかかると「HIT!!」マークが出るので、すばやくキャストボタンを押してください。</p>
+          </div>
+          <div class="helpFigures" aria-hidden="true">
+            <div class="helpDepthMini"><b>DEPTH</b><span></span><i></i><em>5m</em></div>
+            <div class="helpAimMini"><button type="button">&lt;</button><button type="button">&gt;</button></div>
+            <div class="helpCastMini"><canvas id="helpCastCanvas" width="96" height="96"></canvas><strong>HIT!!</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="helpPage" data-help-page="1">
+        <div class="helpBody">
+          <p>⑤ キャストボタンがリールに変わるので、リールをクリックまたはタップしながら時計回りに回すと巻き上げます。</p>
+          <p>巻けば巻くほどテンションが上がり、100%になると糸が切れて失敗扱いです。</p>
+          <p>リールを止めると少しずつテンションが下がります。</p>
+          <p>リールを離すと一気にテンションが下がりますが、距離も離れてしまいます。</p>
+          <p>テンションに気をつけながら魚を釣り上げましょう。</p>
+        </div>
+      </article>
+
+      <article class="helpPage" data-help-page="2">
+        <div class="helpBody">
+          <p>現在はMVP版です。</p>
+          <p>セーブ機能や魚店、効果音はまだ未実装です。</p>
+          <p>今後アップデート予定です。</p>
+        </div>
+      </article>
+
+      <div class="helpNav">
+        <button id="helpTitleBtn" class="helpNavButton" type="button">TITLE</button>
+        <button id="helpPrevBtn" class="helpNavButton" type="button">PREV</button>
+        <span id="helpPageText" class="helpPageText">1/3</span>
+        <button id="helpNextBtn" class="helpNavButton" type="button">NEXT</button>
+      </div>
+    </div>
   </section>
 
   <canvas id="rodCanvas" class="rod3dCanvas"></canvas>
@@ -93,15 +141,15 @@
   </div>
 </div>
 
-<script src="js/ui.js?v=20260701-rodfix1"></script>
-<script src="js/fish.js?v=20260701-rodfix1"></script>
-<script src="js/effects.js?v=20260701-rodfix1"></script>
-<script src="js/water.js?v=20260701-rodfix1"></script>
-<script src="js/tree_wind.js?v=20260701-rodfix1"></script>
-<script src="js/rod.js?v=20260701-rodfix1"></script>
-<script src="js/device.js?v=20260701-rodfix1"></script>
-<script src="js/input.js?v=20260701-rodfix1"></script>
-<script src="js/title.js?v=20260701-rodfix1"></script>
-<script src="js/main.js?v=20260701-rodfix1"></script>
+<script src="js/ui.js?v=20260701-help1"></script>
+<script src="js/fish.js?v=20260701-help1"></script>
+<script src="js/effects.js?v=20260701-help1"></script>
+<script src="js/water.js?v=20260701-help1"></script>
+<script src="js/tree_wind.js?v=20260701-help1"></script>
+<script src="js/rod.js?v=20260701-help1"></script>
+<script src="js/device.js?v=20260701-help1"></script>
+<script src="js/input.js?v=20260701-help1"></script>
+<script src="js/title.js?v=20260701-help1"></script>
+<script src="js/main.js?v=20260701-help1"></script>
 </body>
 </html>
