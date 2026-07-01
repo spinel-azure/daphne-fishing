@@ -4,6 +4,7 @@ const Input={
   depthPointerId:null,
   reelPointerId:null,
   init(){
+    this.preventBrowserGestures();
     this.bindDepthGauge();
     this.bindAimButtons();
     this.bindCastButton();
@@ -13,6 +14,17 @@ const Input={
   },
   shouldUsePointer(ev){
     return Device.acceptsPointer(ev);
+  },
+  preventBrowserGestures(){
+    document.querySelectorAll('img').forEach(img=>{
+      img.draggable=false;
+    });
+    const block=ev=>{
+      if(ev.target.closest?.('#wrap,button,img,canvas'))ev.preventDefault();
+    };
+    document.addEventListener('contextmenu',block);
+    document.addEventListener('dragstart',block);
+    document.addEventListener('selectstart',block);
   },
   bindDepthGauge(){
     const gauge=UI.$('depthGauge');
@@ -75,6 +87,8 @@ const Input={
   },
   bindCastButton(){
     const btn=UI.$('castBtn');
+    btn.addEventListener('contextmenu',ev=>ev.preventDefault());
+    btn.addEventListener('dragstart',ev=>ev.preventDefault());
     btn.addEventListener('pointerdown',ev=>{
       if(!this.shouldUsePointer(ev))return;
       if(game.state===GameState.HIT){

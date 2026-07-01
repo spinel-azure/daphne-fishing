@@ -59,15 +59,15 @@
     <div class="castPowerMeter"><div id="castPowerFill" class="castPowerFill"></div></div>
   </div>
 
-  <img id="rod" class="rod" src="images/tsurizao.png" alt="rod">
-  <img id="bobber" class="bobber" src="images/uki_float.png" alt="bobber">
+  <img id="rod" class="rod" src="images/tsurizao.png" alt="rod" draggable="false">
+  <img id="bobber" class="bobber" src="images/uki_float.png" alt="bobber" draggable="false">
   <div id="fishEmoji" class="fish">FISH</div>
   <div id="splash" class="splash">SPLASH</div>
 
   <div id="reelZone" class="reelZone">
     <div class="reelUnit">
-      <img id="reelImg" class="reelImg" src="images/reel.png" alt="reel">
-      <img id="handleImg" class="handleImg" src="images/handle.png" alt="handle">
+      <img id="reelImg" class="reelImg" src="images/reel.png" alt="reel" draggable="false">
+      <img id="handleImg" class="handleImg" src="images/handle.png" alt="handle" draggable="false">
     </div>
     <div class="reelHint">Rotate the reel</div>
   </div>
@@ -77,7 +77,6 @@
   <button id="aimLeftBtn" class="aimButton aimLeft" type="button" aria-label="Aim left">&lt;</button>
   <button id="aimRightBtn" class="aimButton aimRight" type="button" aria-label="Aim right">&gt;</button>
   <button id="castBtn" class="castButton" type="button" aria-label="Cast">
-    <img src="images/cast_button.png" alt="">
     <canvas id="castGaugeCanvas" class="castGaugeCanvas" aria-hidden="true"></canvas>
     <span id="castActionLabel" class="castActionLabel" aria-hidden="true"></span>
   </button>
