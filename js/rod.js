@@ -137,7 +137,7 @@ const Rod={
     const h=this.lineCanvas.height||UI.$('wrap').clientHeight;
     const cast=UI.$('castBtn')?.getBoundingClientRect?.();
     const wrap=UI.$('wrap')?.getBoundingClientRect?.();
-    if(cast&&wrap){
+    if(cast&&wrap&&cast.width>1&&cast.height>1){
       return {
         x:clamp(cast.left-wrap.left+cast.width*.82,48,w-34),
         y:clamp(cast.top-wrap.top+cast.height+24,h*.72,h+34)
