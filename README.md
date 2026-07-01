@@ -1,8 +1,24 @@
+# Daphne Fishing（ダフューン・フィッシング）
+
+Daphne Fishing は、ブラウザで遊べる釣りゲームのプロトタイプです。
+
+実際のゲーム本体は daphne_fishing/ フォルダ内にあります。
+
+リポジトリ直下の index.html は、GitHub Pagesからゲームを起動するためのリダイレクト用ページです。
+
 # Daphne Fishing
 
 Daphne Fishing is a browser-based fishing game prototype.
 
 The playable game lives in the `daphne_fishing/` directory. The root `index.html` redirects to it so GitHub Pages can open the game from the repository top page.
+
+## ローカルで遊ぶ
+
+ブラウザでリポジトリ直下の index.html を開くか、Windowsでは次のファイルを実行してください。
+
+start_daphne_fishing.bat
+
+このバッチファイルは PowerShell の簡易ローカルサーバーを起動し、自動的にブラウザでゲームを開きます。
 
 ## Play Locally
 
