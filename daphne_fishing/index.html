@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Daphne Fishing MVP4.1</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="wrap">
+  <div id="waterSurface" class="waterSurface" aria-hidden="true">
+    <div class="waterSurfaceTile"></div>
+    <div class="waterSurfaceTile is-mirror"></div>
+    <div class="waterSurfaceTile"></div>
+  </div>
+  <div class="bg" aria-hidden="true"></div>
+  <canvas id="treeWindCanvas" class="treeWindCanvas" aria-hidden="true"></canvas>
+  <div class="shade"></div>
+
+  <section id="titleScene" class="titleScene" aria-label="Daphne Fishing title screen">
+    <div class="titleInner">
+      <canvas id="titleLogoCanvas" class="titleLogoCanvas" role="img" aria-label="Daphne Fishing"></canvas>
+      <div class="titleRipples" aria-hidden="true">
+        <span class="titleRipple r1"></span>
+        <span class="titleRipple r2"></span>
+        <span class="titleRipple r3"></span>
+        <span class="titleRipple r4"></span>
+        <span class="titleRipple r5"></span>
+      </div>
+      <nav class="titleMenu" aria-label="タイトルメニュー">
+        <button class="titleMenuItem is-active" type="button" data-title-action="start">はじめから</button>
+        <button class="titleMenuItem" type="button" data-title-action="continue">つづきから</button>
+        <button class="titleMenuItem" type="button" data-title-action="howto">あそびかた</button>
+        <button class="titleMenuItem" type="button" data-title-action="options">オプション</button>
+      </nav>
+    </div>
+    <p class="saveNotice">※セーブデータはこのブラウザに自動保存されます。<br>※ブラウザのキャッシュやサイトデータを削除すると、セーブデータが消える場合があります。</p>
+  </section>
+
+  <canvas id="rodCanvas" class="rod3dCanvas"></canvas>
+  <canvas id="lineCanvas"></canvas>
+  <canvas id="effectCanvas"></canvas>
+
+  <div class="hud tensionHud">
+    <div class="box tensionBox">
+      <div class="tensionRow"><span>TENSION <span id="tenText">50%</span></span><div class="meter"><div id="tenFill" class="fill"></div></div></div>
+      <div class="distanceRow">DISTANCE <span id="castDistanceText">--</span></div>
+    </div>
+  </div>
+
+  <div class="depthGauge" id="depthGauge" aria-label="タナ選択">
+    <b>DEPTH</b>
+    <div class="gaugeTrack" id="gaugeTrack"></div>
+    <span id="gaugeNow">5m</span>
+  </div>
+
+  <div id="castPower" class="castPower hide" aria-live="polite">
+    <div class="castPowerLabel">CAST POWER <span id="castPowerText">0%</span></div>
+    <div class="castPowerMeter"><div id="castPowerFill" class="castPowerFill"></div></div>
+  </div>
+
+  <img id="rod" class="rod" src="images/tsurizao.png" alt="rod">
+  <img id="bobber" class="bobber" src="images/uki_float.png" alt="bobber">
+  <div id="fishEmoji" class="fish">🐟</div>
+  <div id="splash" class="splash">💦</div>
+
+  <div id="reelZone" class="reelZone">
+    <div class="reelUnit">
+      <img id="reelImg" class="reelImg" src="images/reel.png" alt="reel">
+      <img id="handleImg" class="handleImg" src="images/handle.png" alt="handle">
+    </div>
+    <div class="reelHint">リール外周をグルグル</div>
+  </div>
+
+  <div id="log" class="log">タナを選んで、竿の向きを決めて、キャスティングボタンを長押し！</div>
+
+  <button id="aimLeftBtn" class="aimButton aimLeft" type="button" aria-label="竿を左へ回転">◀</button>
+  <button id="aimRightBtn" class="aimButton aimRight" type="button" aria-label="竿を右へ回転">▶</button>
+  <button id="castBtn" class="castButton" type="button" aria-label="キャスティング">
+    <img src="images/cast_button.png" alt="">
+    <canvas id="castGaugeCanvas" class="castGaugeCanvas" aria-hidden="true"></canvas>
+    <span id="castActionLabel" class="castActionLabel" aria-hidden="true"></span>
+  </button>
+  <button id="backBtn" class="backButton" type="button" aria-label="キャスティング前に戻る">←<span>BACK</span></button>
+
+  <div id="result" class="result"><div class="resultCard"><div id="resultEmoji" class="bigFish">🐟</div><div id="resultTitle" class="fishName">釣れた！</div><div id="resultInfo" class="small"></div><br><button id="againBtn">もう一度</button></div></div>
+</div>
+
+<script src="js/ui.js"></script>
+<script src="js/fish.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/water.js"></script>
+<script src="js/tree_wind.js"></script>
+<script src="js/rod.js"></script>
+<script src="js/device.js"></script>
+<script src="js/input.js"></script>
+<script src="js/title.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
