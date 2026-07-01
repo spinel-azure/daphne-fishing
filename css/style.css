@@ -17,3 +17,49 @@ html,body,#wrap{-webkit-touch-callout:none;-webkit-user-select:none;user-select:
 .rod{bottom:28px!important}@media(max-height:680px){.rod{bottom:22px!important}}
 .tensionRow{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;white-space:nowrap}.tensionRow .meter{height:18px;margin:0;min-width:0}.distanceRow{margin-top:5px;color:#ffe08a;font-size:18px;line-height:1;text-shadow:1px 1px #000}.castButton.is-fail{animation:actionButtonFailFlash .12s steps(2,end) infinite}.castButton.is-fail .castActionLabel{display:block;background:rgba(32,38,48,.94);box-shadow:0 0 10px #fff,0 0 18px #ff4545}.castButton.is-fail img{animation:biteCastImagePulse .18s steps(2,end) infinite;filter:drop-shadow(0 0 14px #ff4545) drop-shadow(0 5px 0 rgba(0,0,0,.58)) brightness(1.08)}@keyframes actionButtonFailFlash{50%{filter:brightness(1.5) saturate(.5)}}@media(max-height:680px){.distanceRow{font-size:16px}}
 .bg,.waterSurface,.treeWindCanvas{transform:scale(var(--bgZoom,1));transform-origin:50% 48%;transition:transform .45s ease}
+@media(max-width:520px){
+  .depthGauge{
+    top:clamp(92px,15vh,116px);
+    right:12px;
+    width:48px;
+    height:196px;
+    padding:5px;
+    font-size:15px;
+    z-index:9;
+  }
+  .gaugeTrack{
+    height:148px;
+    width:13px;
+    margin:5px auto;
+  }
+  .gaugeLabel{
+    left:-29px;
+    width:24px;
+    font-size:14px;
+  }
+  .gaugeMark{
+    left:-12px;
+    width:36px;
+  }
+  .gaugeNowMark{
+    left:-7px;
+    right:-7px;
+  }
+  .aimButton{
+    top:56%;
+  }
+}
+@media(max-width:380px){
+  .depthGauge{
+    top:clamp(86px,14vh,106px);
+    width:44px;
+    height:176px;
+    font-size:13px;
+  }
+  .gaugeTrack{
+    height:132px;
+  }
+  .gaugeLabel{
+    font-size:12px;
+  }
+}
