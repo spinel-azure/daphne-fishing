@@ -13,10 +13,11 @@ const UI={
   },
   setTension(v){
     game.tension=clamp(v,0,100);
-    this.text('tenText',Math.round(game.tension)+'%');
+    const value=Math.round(game.tension);
+    this.text('tenText',value+'%');
     const f=this.$('tenFill');
     if(!f)return;
-    f.style.width=game.tension+'%';
+    f.style.setProperty('width',game.tension+'%','important');
     f.style.background=game.tension<25||game.tension>82?'var(--danger)':game.tension<35||game.tension>70?'var(--warn)':'var(--safe)';
   },
   setCastDistance(rate,failed=false){
@@ -238,12 +239,12 @@ const UI={
     this.$('result').style.display='flex';
     if(ok){
       this.text('resultEmoji',game.fight.fish.e);
-      this.text('resultTitle',`${game.fight.fish.n}を釣り上げた！`);
-      this.text('resultInfo',`レア度 ${game.fight.fish.rare} / タナ ${game.depth}m`);
+      this.text('resultTitle',I18N.t('caught',game.fight.fish.n));
+      this.text('resultInfo',I18N.t('resultInfo',game.fight.fish.rare,game.depth));
     }else{
       this.text('resultEmoji','💨');
       this.text('resultTitle',reason);
-      this.text('resultInfo','もう一度挑戦しよう。');
+      this.text('resultInfo',I18N.t('retry'));
     }
   }
 };

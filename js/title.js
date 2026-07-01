@@ -22,10 +22,10 @@ const TitleScene={
       if(!this.active)return;
       if(ev.key==='ArrowDown'||ev.key==='Down'){
         ev.preventDefault();
-        this.setIndex((this.index+1)%this.items.length);
+        this.moveIndex(1);
       }else if(ev.key==='ArrowUp'||ev.key==='Up'){
         ev.preventDefault();
-        this.setIndex((this.index+this.items.length-1)%this.items.length);
+        this.moveIndex(-1);
       }else if(ev.key==='Enter'||ev.key===' '){
         ev.preventDefault();
         this.chooseOnce(this.index);
@@ -68,12 +68,27 @@ const TitleScene={
     this.index=i;
     this.items.forEach((item,n)=>item.classList.toggle('is-active',n===i));
   },
+  moveIndex(dir){
+    let next=this.index;
+    for(let count=0;count<this.items.length;count++){
+      next=(next+dir+this.items.length)%this.items.length;
+      if(!this.items[next].disabled){
+        this.setIndex(next);
+        return;
+      }
+    }
+  },
   choose(i){
     this.setIndex(i);
     const item=this.items[i];
+    if(!item||item.disabled)return;
     const action=item.dataset.titleAction;
     if(action==='howto'){
       HelpScene.show(0);
+      return;
+    }
+    if(action==='options'){
+      OptionScene.show();
       return;
     }
     if(action!=='start')return;
@@ -199,3 +214,36 @@ const HelpScene={
 };
 
 window.addEventListener('DOMContentLoaded',()=>HelpScene.init());
+
+const OptionScene={
+  scene:null,
+  init(){
+    this.scene=document.getElementById('optionScene');
+    if(!this.scene)return;
+    document.getElementById('optionTitleBtn')?.addEventListener('click',()=>this.returnTitle());
+    document.querySelectorAll('input[name="lang"]').forEach(input=>{
+      input.addEventListener('change',()=>{
+        if(input.checked)I18N.setLang(input.value);
+      });
+    });
+    window.addEventListener('keydown',ev=>{
+      if(this.scene.classList.contains('is-hidden'))return;
+      if(ev.key==='Escape'){
+        ev.preventDefault();
+        this.returnTitle();
+      }
+    });
+  },
+  show(){
+    if(!this.scene)return;
+    TitleScene.active=false;
+    this.scene.classList.remove('is-hidden');
+  },
+  returnTitle(){
+    if(!this.scene)return;
+    this.scene.classList.add('is-hidden');
+    TitleScene.returnToTitle();
+  }
+};
+
+window.addEventListener('DOMContentLoaded',()=>OptionScene.init());

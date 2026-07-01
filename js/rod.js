@@ -268,7 +268,7 @@ const Rod={
       if(game.fight.distance<.5)game.fight.distance=0;
       UI.setTension(game.tension+clockwise*(2.3+f.pow*.9)*(.35+.65*hpRate));
       if(game.tension>=100){
-        Game.finish(false,'テンション限界！ 糸が切れた！');
+        Game.finish(false,I18N.t('tensionBreak'));
         return;
       }
       if(Math.random()<clockwise*.25)Effects.addRipple(game.bob.x,game.bob.y,true);

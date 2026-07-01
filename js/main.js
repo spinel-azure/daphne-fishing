@@ -122,7 +122,7 @@ const Game={
   castAt(x,y){
     if(game.state!==GameState.READY)return;
     Rod.aimAt(x,y);
-    UI.log('竿の向きを決めたら、キャスティングボタンを長押ししてね。');
+    UI.log(I18N.t('aimPrompt'));
   },
   startCasting(){
     if(game.state!==GameState.READY||game.casting)return;
@@ -151,7 +151,7 @@ const Game={
     game.castPower=100;
     UI.showCastPower(100,true);
     UI.showCastFail();
-    UI.log('力みすぎた！');
+    UI.log(I18N.t('overCast'));
     window.setTimeout(()=>{
       if(game.casting){
         game.casting=false;
@@ -184,7 +184,7 @@ const Game={
     UI.$('bobber').style.display='block';
     UI.$('fishEmoji').style.display='none';
     UI.$('splash').style.display='none';
-    UI.log(options.failed?'投げ損ねた！ ウキが足元に落ちた。':`${game.depth}mのタナへ仕掛けを投入！\n竿先から糸が伸びています。アタリを待とう。`);
+    UI.log(options.failed?I18N.t('castFailed'):I18N.t('castWait',game.depth));
     game.biteTimer=options.failed?rand(1800,3600):rand(1400,4200);
     Rod.drawLine();
     Effects.addRipple(game.bob.x,game.bob.y,true);
@@ -196,7 +196,7 @@ const Game={
     UI.$('splash').style.left=game.bob.x+'px';
     UI.$('splash').style.top=game.bob.y+'px';
     UI.$('splash').style.display='block';
-    UI.log('ウキが沈んだ！\nすばやく「アワセ！」を押せ！');
+    UI.log(I18N.t('bite'));
     game.biteTimer=2400;
     Effects.addRipple(game.bob.x,game.bob.y,true);
   },
@@ -223,7 +223,7 @@ const Game={
     UI.$('fishEmoji').style.left=game.bob.x+'px';
     UI.$('fishEmoji').style.top=(game.bob.y+45)+'px';
     UI.setTension(48);
-    UI.log('何かが掛かった！\nリールで引き寄せろ！');
+    UI.log(I18N.t('hooked'));
     Effects.addRipple(game.bob.x,game.bob.y,true);
   },
   finish(ok,reason){
@@ -254,7 +254,7 @@ const Game={
     UI.$('fishEmoji').style.display='none';
     UI.$('splash').style.display='none';
     UI.setTension(50);
-    UI.log('タナを選んで、竿の向きを決めて、キャスティングボタンを長押し！');
+    UI.log(I18N.t('ready'));
     Rod.drawLine();
   },
   updateFightPosition(now){
@@ -285,7 +285,7 @@ const Game={
       if(game.biteTimer<=0)this.startBite();
     }else if(game.state===GameState.HIT){
       game.biteTimer-=dt*1000;
-      if(game.biteTimer<=0)this.finish(false,'アワセ失敗！');
+      if(game.biteTimer<=0)this.finish(false,I18N.t('hookFail'));
     }else if(game.state===GameState.BATTLE&&game.fight){
       const f=game.fight.fish;
       const hpRate=clamp(game.fight.hp/game.fight.maxHp,0,1);
@@ -309,7 +309,7 @@ const Game={
       game.fight.distance=Math.min(game.fight.distance,game.fight.maxDistance*1.35);
       if(game.fight.distance<.5)game.fight.distance=0;
       if(game.tension>=100){
-        this.finish(false,'テンション限界！ 糸が切れた！');
+        this.finish(false,I18N.t('tensionBreak'));
         requestAnimationFrame(t=>this.tick(t));
         return;
       }
@@ -322,7 +322,7 @@ const Game={
       else{
         if(game.tension<=5){
           game.looseTimer+=dt;
-          if(game.looseTimer>1.25)this.finish(false,'テンション不足！ 魚が逃げた！');
+          if(game.looseTimer>1.25)this.finish(false,I18N.t('looseFail'));
         }else{
           game.looseTimer=0;
         }

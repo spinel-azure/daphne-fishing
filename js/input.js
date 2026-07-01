@@ -36,7 +36,7 @@ const Input={
       const track=UI.$('gaugeTrack').getBoundingClientRect();
       const ratio=clamp((ev.clientY-track.top)/track.height,0,1);
       UI.setDepth(1+ratio*14);
-      UI.log(`Depth ${game.depth}m selected.`);
+      UI.log(I18N.t('depthSelected',game.depth));
     };
     gauge.addEventListener('pointerdown',ev=>{
       if(!this.shouldUsePointer(ev))return;
