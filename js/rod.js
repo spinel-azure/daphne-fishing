@@ -133,10 +133,19 @@ const Rod={
     this.setAimAngle((x-center)/half,instant);
   },
   basePoint(){
-    const bottomOffset=this.lineCanvas.height<680?34:42;
+    const w=this.lineCanvas.width||UI.$('wrap').clientWidth;
+    const h=this.lineCanvas.height||UI.$('wrap').clientHeight;
+    const cast=UI.$('castBtn')?.getBoundingClientRect?.();
+    const wrap=UI.$('wrap')?.getBoundingClientRect?.();
+    if(cast&&wrap){
+      return {
+        x:clamp(cast.left-wrap.left+cast.width*.82,48,w-34),
+        y:clamp(cast.top-wrap.top+cast.height+24,h*.72,h+34)
+      };
+    }
     return {
-      x:this.lineCanvas.width-48,
-      y:this.lineCanvas.height-bottomOffset
+      x:w*.66,
+      y:h+24
     };
   },
   curvePoint(n){
@@ -258,6 +267,10 @@ const Rod={
       game.fight.distance=Math.max(0,game.fight.distance-reelGain);
       if(game.fight.distance<.5)game.fight.distance=0;
       UI.setTension(game.tension+clockwise*(2.3+f.pow*.9)*(.35+.65*hpRate));
+      if(game.tension>=100){
+        Game.finish(false,'テンション限界！ 糸が切れた！');
+        return;
+      }
       if(Math.random()<clockwise*.25)Effects.addRipple(game.bob.x,game.bob.y,true);
     }else if(d<0){
       UI.setTension(game.tension-1.0);
