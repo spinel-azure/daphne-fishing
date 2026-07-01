@@ -22,6 +22,7 @@ const game={
   casting:false,
   castPower:0,
   castDistanceRate:50,
+  castTarget:null,
   castStart:0,
   castFailed:false
 };
@@ -81,33 +82,32 @@ const Game={
   },
   castPointFromPower(power,failed=false){
     const bounds=this.playBounds();
-    const base=Rod.basePoint();
-    const rad=Rod.targetRad;
-    const dx=Math.cos(rad);
-    const dy=Math.sin(rad);
-    const origin=base;
-    const minDist=failed?28:42;
-    const maxDist=this.rayDistanceToBounds(origin.x,origin.y,dx,dy,bounds);
-    let distance=minDist;
-
-    if(!failed){
-      const rate=this.castPowerToDistanceRate(power,false)/100;
-      distance=minDist+(Math.max(minDist,maxDist*.94)-minDist)*rate;
-    }
-
-    let x=origin.x+dx*distance;
-    let y=origin.y+dy*distance;
-
-    if(failed){
-      x=base.x+dx*24;
-      y=base.y+dy*24;
-    }
+    const aimRate=clamp(Rod.getAimAngle?.()??0,-1,1);
+    const distanceRate=this.castPowerToDistanceRate(power,failed)/100;
+    const sidePad=.08;
+    const castX=clamp((aimRate+1)/2,sidePad,1-sidePad);
+    const usableTop=bounds.top;
+    const usableBottom=bounds.bottom;
+    const castY=failed?1:clamp(1-distanceRate,.04,.96);
+    const x=bounds.left+(bounds.right-bounds.left)*castX;
+    const y=usableTop+(usableBottom-usableTop)*castY;
+    const col=clamp(Math.floor(castX*4),0,3);
+    const row=clamp(Math.floor(castY*4),0,3);
 
     return {
       x:clamp(x,bounds.left,bounds.right),
       y:clamp(y,bounds.top,bounds.bottom),
       w:bounds.width,
-      h:bounds.height
+      h:bounds.height,
+      target:{
+        x:castX,
+        y:castY,
+        distanceRate,
+        aimRate,
+        col,
+        row,
+        areaIndex:row*4+col+1
+      }
     };
   },
   rayDistanceToBounds(x,y,dx,dy,bounds){
@@ -171,6 +171,12 @@ const Game={
     game.bob.x=p.x;
     game.bob.y=p.y;
     game.castDistanceRate=clamp(options.distanceRate??game.castDistanceRate,0,100);
+    game.castTarget=p.target??{
+      x:clamp(p.x/p.w,0,1),
+      y:clamp(p.y/p.h,0,1),
+      distanceRate:game.castDistanceRate/100,
+      aimRate:Rod.getAimAngle?.()??0
+    };
     UI.setCastDistance(game.castDistanceRate,options.failed);
     game.aim=clamp(Math.round(p.x/p.w*100),0,100);
     Rod.aimAt(game.bob.x,game.bob.y,false);
@@ -221,6 +227,7 @@ const Game={
     Effects.addRipple(game.bob.x,game.bob.y,true);
   },
   finish(ok,reason){
+    if(game.state===GameState.RESULT)return;
     this.setState(GameState.RESULT);
     Rod.endReel();
     UI.$('reelZone').style.display='none';
@@ -238,6 +245,7 @@ const Game={
     game.casting=false;
     game.castFailed=false;
     game.castDistanceRate=50;
+    game.castTarget=null;
     UI.setCastDistance(null);
     UI.hideCastPower();
     Rod.endReel();
@@ -300,13 +308,17 @@ const Game={
       game.fight.distance=Math.max(0,game.fight.distance);
       game.fight.distance=Math.min(game.fight.distance,game.fight.maxDistance*1.35);
       if(game.fight.distance<.5)game.fight.distance=0;
+      if(game.tension>=100){
+        this.finish(false,'テンション限界！ 糸が切れた！');
+        requestAnimationFrame(t=>this.tick(t));
+        return;
+      }
       this.updateFightPosition(now);
 
       UI.$('fishEmoji').style.left=game.bob.x+'px';
       UI.$('fishEmoji').style.top=(game.bob.y+48+Math.sin(now/180)*5)+'px';
 
       if(game.fight&&game.fight.distance<=0)this.finish(true,'');
-      else if(game.tension>=100)this.finish(false,'テンション限界！ 糸が切れた！');
       else{
         if(game.tension<=5){
           game.looseTimer+=dt;
