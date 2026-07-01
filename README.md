@@ -14,7 +14,7 @@ The playable game lives in the `daphne_fishing/` directory. The root `index.html
 
 ## 公開URL
 
-https://spinel-azure.github.io/daphne-fishing/
+https://spinel-azure.github.io/daphne-fishing/daphne_fishing/
 
 ## ローカルで遊ぶ
 
