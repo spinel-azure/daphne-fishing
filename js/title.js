@@ -1,12 +1,21 @@
 const TitleScene={
-  scene:null,items:[],index:0,active:true,logoCanvas:null,logoCtx:null,logoImage:null,logoStart:0,
+  scene:null,items:[],index:0,active:true,chosen:false,logoCanvas:null,logoCtx:null,logoImage:null,logoStart:0,
   init(){
     this.scene=document.getElementById('titleScene');
     this.items=[...document.querySelectorAll('.titleMenuItem')];
     if(!this.scene||!this.items.length)return;
     this.initLogoCanvas();
     this.items.forEach((item,i)=>{
-      item.addEventListener('click',()=>this.choose(i));
+      const activate=()=>this.chooseOnce(i);
+      item.addEventListener('click',activate);
+      item.addEventListener('pointerup',ev=>{
+        if(ev.pointerType==='touch'||ev.pointerType==='pen'){
+          activate();
+        }
+      });
+      item.addEventListener('touchend',activate,{passive:true});
+      item.addEventListener('pointerdown',()=>this.setIndex(i));
+      item.addEventListener('touchstart',()=>this.setIndex(i),{passive:true});
       item.addEventListener('pointerenter',()=>this.setIndex(i));
     });
     window.addEventListener('keydown',ev=>{
@@ -19,7 +28,7 @@ const TitleScene={
         this.setIndex((this.index+this.items.length-1)%this.items.length);
       }else if(ev.key==='Enter'||ev.key===' '){
         ev.preventDefault();
-        this.choose(this.index);
+        this.chooseOnce(this.index);
       }
     });
     this.setIndex(0);
@@ -66,7 +75,17 @@ const TitleScene={
     item.classList.remove('cursor-flash');
     void item.offsetWidth;
     item.classList.add('cursor-flash');
-    window.setTimeout(()=>this.startGame(),220);
+    this.startGame();
+  },
+  chooseOnce(i){
+    const item=this.items[i];
+    if(item?.dataset.titleAction!=='start'){
+      this.choose(i);
+      return;
+    }
+    if(this.chosen)return;
+    this.chosen=true;
+    this.choose(i);
   },
   startGame(){
     if(!this.active)return;

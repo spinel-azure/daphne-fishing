@@ -1,6 +1,7 @@
 const Input={
   aimTimer:null,
   castPointerId:null,
+  castTouchActive:false,
   depthPointerId:null,
   reelPointerId:null,
   init(){
@@ -25,7 +26,6 @@ const Input={
     document.addEventListener('contextmenu',block);
     document.addEventListener('dragstart',block);
     document.addEventListener('selectstart',block);
-    document.addEventListener('touchstart',block,{passive:false,capture:true});
   },
   bindDepthGauge(){
     const gauge=UI.$('depthGauge');
@@ -90,8 +90,30 @@ const Input={
     const btn=UI.$('castBtn');
     btn.addEventListener('contextmenu',ev=>ev.preventDefault());
     btn.addEventListener('dragstart',ev=>ev.preventDefault());
-    btn.addEventListener('touchstart',ev=>ev.preventDefault(),{passive:false,capture:true});
+    btn.addEventListener('touchstart',ev=>{
+      if(!Device.isTouchMode())return;
+      ev.preventDefault();
+      this.castTouchActive=true;
+      if(game.state===GameState.HIT){
+        Game.hook();
+        return;
+      }
+      if(game.state===GameState.READY)Game.startCasting();
+    },{passive:false,capture:true});
+    btn.addEventListener('touchend',ev=>{
+      if(!this.castTouchActive)return;
+      ev.preventDefault();
+      this.castTouchActive=false;
+      if(game.casting)Game.releaseCasting();
+    },{passive:false,capture:true});
+    btn.addEventListener('touchcancel',ev=>{
+      if(!this.castTouchActive)return;
+      ev.preventDefault();
+      this.castTouchActive=false;
+      if(game.casting)Game.releaseCasting();
+    },{passive:false,capture:true});
     btn.addEventListener('pointerdown',ev=>{
+      if(this.castTouchActive)return;
       if(!this.shouldUsePointer(ev))return;
       if(game.state===GameState.HIT){
         ev.preventDefault();
@@ -105,6 +127,7 @@ const Input={
       Game.startCasting();
     });
     btn.addEventListener('pointerup',ev=>{
+      if(this.castTouchActive)return;
       if(ev.pointerId!==this.castPointerId)return;
       ev.preventDefault();
       this.castPointerId=null;
