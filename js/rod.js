@@ -1,80 +1,137 @@
 const Rod={
-  lineCanvas:null,
-  ctx:null,
-  rodCanvas:null,
-  rodCtx:null,
-  reelAngle:0,
-  lastPointerAngle:null,
-  aimAngle:0,
-  targetAimAngle:0,
-  lastDrawTime:0,
-
+  lineCanvas:null,ctx:null,rodCanvas:null,angleDeg:-10,reelAngle:0,lastPointerAngle:null,currentRad:-Math.PI*.58,targetRad:-Math.PI*.58,currentAimAngle:0,targetAimAngle:0,lastAimTime:0,
+  THREE:null,renderer:null,scene:null,camera:null,root:null,segments:[],guides:[],rodReady:false,renderScale:.5,segmentCount:14,segmentLength:32,minRad:-2.86,maxRad:-1.36,
   init(){
     this.lineCanvas=UI.$('lineCanvas');
     this.ctx=this.lineCanvas.getContext('2d');
     this.rodCanvas=UI.$('rodCanvas');
-    this.rodCtx=this.rodCanvas.getContext('2d');
-    this.setRodMode(true);
+    this.setRodMode(false);
     this.updateAim(50);
     this.updateHandle(0);
+    this.initThree();
   },
-
-  setRodMode(useCanvas){
+  setRodMode(use3d){
     const rod=UI.$('rod');
-    if(this.rodCanvas)this.rodCanvas.style.display=useCanvas?'block':'none';
-    if(rod)rod.style.display=useCanvas?'none':'block';
+    if(this.rodCanvas)this.rodCanvas.style.display=use3d?'block':'none';
+    if(rod)rod.style.display=use3d?'none':'block';
   },
+  async initThree(){
+    try{
+      const THREE=await import('https://unpkg.com/three@0.165.0/build/three.module.js');
+      this.THREE=THREE;
+      this.scene=new THREE.Scene();
+      this.camera=new THREE.OrthographicCamera(0,1,1,0,-1000,1000);
+      this.renderer=new THREE.WebGLRenderer({canvas:this.rodCanvas,alpha:true,antialias:false,powerPreference:'high-performance'});
+      this.renderer.setPixelRatio(1);
+      this.renderer.outputColorSpace=THREE.SRGBColorSpace;
+      this.scene.add(new THREE.AmbientLight(0x6d7280,1.75));
+      const key=new THREE.DirectionalLight(0xffdf9c,2.1);
+      key.position.set(-2,3,6);
+      this.scene.add(key);
+      const fill=new THREE.DirectionalLight(0x4b8fcf,.75);
+      fill.position.set(3,1,4);
+      this.scene.add(fill);
+      this.root=new THREE.Group();
+      this.scene.add(this.root);
+      this.buildRod();
+      this.rodReady=true;
+      this.setRodMode(true);
+      this.resize(this.lineCanvas.width||UI.$('wrap').clientWidth,this.lineCanvas.height||UI.$('wrap').clientHeight);
+      this.drawLine();
+    }catch(e){
+      console.warn('Three.js rod failed to load:',e);
+      this.rodReady=false;
+      this.setRodMode(false);
+    }
+  },
+  buildRod(){
+    const THREE=this.THREE;
+    const rodMat=new THREE.MeshLambertMaterial({color:0xf4f2e8,flatShading:true});
+    const wrapMat=new THREE.MeshLambertMaterial({color:0xdff8ff,flatShading:true});
+    const handleMat=new THREE.MeshLambertMaterial({color:0x392617,flatShading:true});
 
+    for(let i=0;i<this.segmentCount;i++){
+      const t=i/(this.segmentCount-1);
+      const r=THREE.MathUtils.lerp(6.5,2.4,t);
+      const geo=new THREE.CylinderGeometry(r*.75,r,this.segmentLength,6,1,false);
+      geo.rotateZ(Math.PI/2);
+      const mesh=new THREE.Mesh(geo,rodMat);
+      mesh.matrixAutoUpdate=false;
+      this.root.add(mesh);
+      this.segments.push(mesh);
+      if(i%3===1||i===this.segmentCount-1){
+        const guide=new THREE.Mesh(new THREE.TorusGeometry(r*1.35,r*.16,4,6),wrapMat);
+        guide.rotation.y=Math.PI/2;
+        guide.matrixAutoUpdate=false;
+        this.root.add(guide);
+        this.guides.push({mesh:guide,index:i,offset:this.segmentLength*.38});
+      }
+    }
+
+    const handle=new THREE.Mesh(new THREE.CylinderGeometry(9,12,46,6,1,false),handleMat);
+    handle.rotation.z=Math.PI/2;
+    handle.matrixAutoUpdate=false;
+    this.root.add(handle);
+    this.handle=handle;
+  },
   resize(w,h){
     this.lineCanvas.width=w;
     this.lineCanvas.height=h;
-    this.rodCanvas.width=w;
-    this.rodCanvas.height=h;
-    this.rodCanvas.style.width=w+'px';
-    this.rodCanvas.style.height=h+'px';
-    this.drawRod();
+    if(this.rodCanvas){
+      this.rodCanvas.width=Math.max(1,Math.floor(w*this.renderScale));
+      this.rodCanvas.height=Math.max(1,Math.floor(h*this.renderScale));
+      this.rodCanvas.style.width=w+'px';
+      this.rodCanvas.style.height=h+'px';
+    }
+    if(this.rodReady){
+      this.renderer.setSize(Math.max(1,Math.floor(w*this.renderScale)),Math.max(1,Math.floor(h*this.renderScale)),false);
+      this.camera.left=0;
+      this.camera.right=w;
+      this.camera.top=0;
+      this.camera.bottom=h;
+      this.camera.updateProjectionMatrix();
+      this.updateRodMesh();
+    }
     this.drawLine();
   },
-
   updateAim(aim){
     this.setAimAngle((clamp(aim,0,100)-50)/50,true);
+    const rod=UI.$('rod');
+    if(rod)rod.style.setProperty('--rodrot',this.angleDeg+'deg');
   },
-
   setAimAngle(value,instant=false){
     this.targetAimAngle=clamp(value,-1,1);
-    if(instant)this.aimAngle=this.targetAimAngle;
+    const center=(this.minRad+this.maxRad)/2;
+    const half=(this.maxRad-this.minRad)/2;
+    this.targetRad=center+this.targetAimAngle*half;
+    this.angleDeg=this.targetAimAngle*18-10;
+    const rod=UI.$('rod');
+    if(rod)rod.style.setProperty('--rodrot',this.angleDeg+'deg');
+    if(instant){
+      this.currentAimAngle=this.targetAimAngle;
+      this.currentRad=this.targetRad;
+    }
   },
-
+  setFacingRad(rad,instant=false){
+    const center=(this.minRad+this.maxRad)/2;
+    const half=(this.maxRad-this.minRad)/2;
+    this.setAimAngle((clamp(rad,this.minRad,this.maxRad)-center)/half,instant);
+  },
+  rotate(deltaRad){this.setAimAngle(this.targetAimAngle+deltaRad*1.35)},
+  facingRad(){
+    const base=this.basePoint();
+    const tip=this.getTip();
+    return Math.atan2(tip.y-base.y,tip.x-base.x);
+  },
   getAimAngle(){
     return this.targetAimAngle;
   },
-
-  setFacingRad(rad,instant=false){
-    const base=this.basePoint();
-    const farX=base.x+Math.cos(rad)*280;
-    const bounds=Game?.playBounds?.()??{left:28,right:this.lineCanvas.width-28};
-    const center=(bounds.left+bounds.right)/2;
-    const half=Math.max(80,(bounds.right-bounds.left)/2);
-    this.setAimAngle((farX-center)/half,instant);
-  },
-
-  rotate(deltaRad){
-    this.setAimAngle(this.targetAimAngle+deltaRad*1.45);
-  },
-
-  facingRad(){
-    const base=this.basePoint();
-    const tip=this.getTip(this.targetAimAngle);
-    return Math.atan2(tip.y-base.y,tip.x-base.x);
-  },
-
   aimAt(x,y,instant=false){
-    const bounds=Game?.playBounds?.()??{left:28,right:this.lineCanvas.width-28};
-    const center=(bounds.left+bounds.right)/2;
-    const half=Math.max(80,(bounds.right-bounds.left)/2);
+    const w=this.lineCanvas.width||UI.$('wrap').clientWidth;
+    const center=w*.5;
+    const half=Math.max(90,w*.42);
     this.setAimAngle((x-center)/half,instant);
   },
-
   basePoint(){
     const bottomOffset=this.lineCanvas.height<680?34:42;
     return {
@@ -82,170 +139,71 @@ const Rod={
       y:this.lineCanvas.height-bottomOffset
     };
   },
-
-  rodPathPoints(aim=this.aimAngle){
-    const w=this.rodCanvas.width||UI.$('wrap').clientWidth;
-    const h=this.rodCanvas.height||UI.$('wrap').clientHeight;
+  curvePoint(n){
+    const THREE=this.THREE;
     const base=this.basePoint();
-    const waterTop=h*.25;
-    const tipY=clamp(h*.43-(1-Math.abs(aim))*h*.035,waterTop+24,h*.62);
-    const centerX=w*.56;
-    const spread=w*.45;
-    const tipX=clamp(centerX+aim*spread,24,w-24);
-    const controlX=base.x-w*.12+aim*w*.16;
-    const controlY=base.y-h*.31;
-    const tensionBend=game?.state===GameState.BATTLE?clamp((game.tension-50)/50,-1,1)*18:0;
-    return {
-      base,
-      c1:{x:controlX,y:controlY+tensionBend},
-      tip:{x:tipX,y:tipY}
-    };
+    const t=n/this.segmentCount;
+    const len=this.segmentLength*this.segmentCount;
+    const aim=this.rodReady?this.currentAimAngle:this.targetAimAngle;
+    const bend=5+(game.tension??50)*1.35;
+    const wobble=Math.sin(t*Math.PI*1.25)*3;
+    const upright=-len*.86*t;
+    const naturalLean=-len*.22*t;
+    const sideSwing=aim*len*.30*Math.pow(t,1.28);
+    const x=base.x+naturalLean+sideSwing+wobble;
+    const y=base.y+upright+bend*t*t;
+    return THREE?new THREE.Vector3(x,y,0):{x,y};
   },
-
-  pointOnRod(t,aim=this.aimAngle){
-    const p=this.rodPathPoints(aim);
-    const mt=1-t;
-    return {
-      x:mt*mt*p.base.x+2*mt*t*p.c1.x+t*t*p.tip.x,
-      y:mt*mt*p.base.y+2*mt*t*p.c1.y+t*t*p.tip.y
-    };
+  getTip(){
+    const p=this.curvePoint(this.segmentCount);
+    return {x:p.x,y:p.y};
   },
-
-  normalOnRod(t){
-    const a=this.pointOnRod(clamp(t-.01,0,1));
-    const b=this.pointOnRod(clamp(t+.01,0,1));
-    const dx=b.x-a.x;
-    const dy=b.y-a.y;
-    const len=Math.hypot(dx,dy)||1;
-    return {x:-dy/len,y:dx/len};
-  },
-
-  getTip(aim=this.aimAngle){
-    return this.rodPathPoints(aim).tip;
-  },
-
-  drawRod(){
-    if(!this.rodCtx)return;
+  updateRodMesh(){
+    if(!this.rodReady)return;
+    const THREE=this.THREE;
     const now=performance.now();
-    const dt=this.lastDrawTime?Math.min(.05,(now-this.lastDrawTime)/1000):.016;
-    this.lastDrawTime=now;
-    this.aimAngle+=(this.targetAimAngle-this.aimAngle)*(1-Math.exp(-dt/.16));
-
-    const c=this.rodCtx;
-    const w=this.rodCanvas.width;
-    const h=this.rodCanvas.height;
-    c.clearRect(0,0,w,h);
-
-    const p=this.rodPathPoints();
-    c.lineCap='round';
-    c.lineJoin='round';
-
-    c.strokeStyle='rgba(0,0,0,.95)';
-    c.lineWidth=13;
-    c.beginPath();
-    c.moveTo(p.base.x,p.base.y);
-    c.quadraticCurveTo(p.c1.x,p.c1.y,p.tip.x,p.tip.y);
-    c.stroke();
-
-    const body=c.createLinearGradient(p.base.x,p.base.y,p.tip.x,p.tip.y);
-    body.addColorStop(0,'#f4f1df');
-    body.addColorStop(.55,'#ffffff');
-    body.addColorStop(1,'#e8fbff');
-    c.strokeStyle=body;
-    c.lineWidth=8;
-    c.beginPath();
-    c.moveTo(p.base.x,p.base.y);
-    c.quadraticCurveTo(p.c1.x,p.c1.y,p.tip.x,p.tip.y);
-    c.stroke();
-
-    c.strokeStyle='#22d8ff';
-    c.lineWidth=5;
-    for(const t of [.23,.52,.78]){
-      const q=this.pointOnRod(t);
-      const n=this.normalOnRod(t);
-      c.beginPath();
-      c.moveTo(q.x-n.x*7,q.y-n.y*7);
-      c.lineTo(q.x+n.x*7,q.y+n.y*7);
-      c.stroke();
+    const dt=this.lastAimTime?Math.min(.05,(now-this.lastAimTime)/1000):.016;
+    this.lastAimTime=now;
+    this.currentAimAngle+=(this.targetAimAngle-this.currentAimAngle)*(1-Math.exp(-dt/.22));
+    this.currentRad+=(this.targetRad-this.currentRad)*(1-Math.exp(-dt/.22));
+    for(let i=0;i<this.segmentCount;i++){
+      const a=this.curvePoint(i);
+      const b=this.curvePoint(i+1);
+      const mid=a.clone().add(b).multiplyScalar(.5);
+      const dir=b.clone().sub(a).normalize();
+      const quat=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0),dir);
+      const mesh=this.segments[i];
+      mesh.position.copy(mid);
+      mesh.quaternion.copy(quat);
+      mesh.updateMatrix();
     }
-
-    c.strokeStyle='#05070a';
-    c.fillStyle='#dff8ff';
-    c.lineWidth=3;
-    for(const t of [.34,.47,.60,.72,.84,.94]){
-      const q=this.pointOnRod(t);
-      const n=this.normalOnRod(t);
-      const gx=q.x+n.x*8;
-      const gy=q.y+n.y*8;
-      c.beginPath();
-      c.moveTo(q.x,q.y);
-      c.lineTo(gx,gy);
-      c.stroke();
-      c.beginPath();
-      c.ellipse(gx,gy,5,3,Math.atan2(n.y,n.x),0,Math.PI*2);
-      c.fill();
-      c.stroke();
+    for(const guide of this.guides){
+      const p=this.curvePoint(guide.index+guide.offset/this.segmentLength);
+      const n=this.curvePoint(Math.min(this.segmentCount,guide.index+1+guide.offset/this.segmentLength));
+      const dir=n.sub(p).normalize();
+      const quat=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0),dir);
+      guide.mesh.position.copy(p);
+      guide.mesh.quaternion.copy(quat);
+      guide.mesh.updateMatrix();
     }
-
-    c.fillStyle='#36dfff';
-    c.strokeStyle='#05070a';
-    c.lineWidth=3;
-    c.beginPath();
-    c.moveTo(p.tip.x,p.tip.y-8);
-    c.lineTo(p.tip.x+7,p.tip.y+6);
-    c.lineTo(p.tip.x-5,p.tip.y+7);
-    c.closePath();
-    c.fill();
-    c.stroke();
-
-    this.drawReelOnRod(c);
+    const base=this.basePoint();
+    this.handle.position.set(base.x+16,base.y+8,0);
+    this.handle.updateMatrix();
+    this.renderer.render(this.scene,this.camera);
   },
-
-  drawReelOnRod(c){
-    const q=this.pointOnRod(.16);
-    const n=this.normalOnRod(.16);
-    const x=q.x+n.x*18;
-    const y=q.y+n.y*18;
-    c.save();
-    c.translate(x,y);
-    c.rotate(Math.atan2(n.y,n.x));
-    c.fillStyle='#1b2028';
-    c.strokeStyle='#05070a';
-    c.lineWidth=4;
-    c.beginPath();
-    c.ellipse(0,0,15,11,0,0,Math.PI*2);
-    c.fill();
-    c.stroke();
-    c.fillStyle='#59606b';
-    c.beginPath();
-    c.ellipse(0,0,8,6,0,0,Math.PI*2);
-    c.fill();
-    c.beginPath();
-    c.moveTo(12,3);
-    c.lineTo(24,11);
-    c.lineWidth=5;
-    c.stroke();
-    c.fillStyle='#0d1118';
-    c.beginPath();
-    c.arc(29,14,5,0,Math.PI*2);
-    c.fill();
-    c.restore();
-  },
-
   drawLine(){
     const c=this.ctx;
     c.clearRect(0,0,this.lineCanvas.width,this.lineCanvas.height);
-    this.drawRod();
+    this.updateRodMesh();
     if(![GameState.WAIT,GameState.HIT,GameState.BATTLE].includes(game.state))return;
     const tip=this.getTip();
     const b=game.bob;
-    const target=game.castTarget??{distanceRate:game.castDistanceRate/100,aimRate:this.aimAngle};
+    const target=game.castTarget??{distanceRate:game.castDistanceRate/100,aimRate:this.getAimAngle()};
     const far=clamp(target.distanceRate??.5,0,1);
-    const aim=clamp(target.aimRate??this.aimAngle,-1,1);
+    const aim=clamp(target.aimRate??this.getAimAngle(),-1,1);
     const cx=(tip.x+b.x)/2+aim*18;
     const cy=(tip.y+b.y)/2+48-far*78;
-
-    c.strokeStyle='rgba(235,250,255,.95)';
+    c.strokeStyle='rgba(235,250,255,.92)';
     c.lineWidth=2;
     c.shadowColor='rgba(80,170,255,.55)';
     c.shadowBlur=3;
@@ -254,7 +212,6 @@ const Rod={
     c.quadraticCurveTo(cx,cy,b.x,b.y);
     c.stroke();
     c.shadowBlur=0;
-
     if(game.state===GameState.BATTLE){
       c.strokeStyle='rgba(190,230,255,.55)';
       c.beginPath();
@@ -263,7 +220,6 @@ const Rod={
       c.stroke();
     }
   },
-
   updateHandle(angle){
     this.reelAngle=angle;
     const handle=UI.$('handleImg');
@@ -276,22 +232,9 @@ const Rod={
     handle.style.top=y+'px';
     handle.style.transform=`translate(-50%,-50%) rotate(${angle+Math.PI/2}rad)`;
   },
-
-  pointerAngle(ev){
-    const zone=UI.$('reelZone').getBoundingClientRect();
-    return Math.atan2(ev.clientY-(zone.top+zone.height/2),ev.clientX-(zone.left+zone.width/2));
-  },
-
-  isReelHeld(){
-    return this.lastPointerAngle!==null;
-  },
-
-  startReel(ev){
-    if(game.state!==GameState.BATTLE)return;
-    ev.preventDefault();
-    this.lastPointerAngle=this.pointerAngle(ev);
-  },
-
+  pointerAngle(ev){const zone=UI.$('reelZone').getBoundingClientRect();return Math.atan2(ev.clientY-(zone.top+zone.height/2),ev.clientX-(zone.left+zone.width/2))},
+  isReelHeld(){return this.lastPointerAngle!==null},
+  startReel(ev){if(game.state!==GameState.BATTLE)return;ev.preventDefault();this.lastPointerAngle=this.pointerAngle(ev)},
   moveReel(ev){
     if(game.state!==GameState.BATTLE||this.lastPointerAngle===null)return;
     ev.preventDefault();
@@ -320,8 +263,5 @@ const Rod={
       UI.setTension(game.tension-1.0);
     }
   },
-
-  endReel(){
-    this.lastPointerAngle=null;
-  }
+  endReel(){this.lastPointerAngle=null}
 };

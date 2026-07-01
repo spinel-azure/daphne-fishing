@@ -64,7 +64,7 @@ const Game={
     return {
       left:28,
       right:wrap.width-28,
-      top:wrap.height*.18,
+      top:wrap.height*.34,
       bottom:Math.max(wrap.height*.35,controlsTop-26),
       width:wrap.width,
       height:wrap.height
