@@ -12,6 +12,10 @@ Daphne Fishing is a browser-based fishing game prototype.
 
 The playable game lives in the `daphne_fishing/` directory. The root `index.html` redirects to it so GitHub Pages can open the game from the repository top page.
 
+## 公開URL
+
+https://spinel-azure.github.io/daphne-fishing/
+
 ## ローカルで遊ぶ
 
 ブラウザでリポジトリ直下の index.html を開くか、Windowsでは次のファイルを実行してください。
