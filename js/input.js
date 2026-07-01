@@ -25,6 +25,7 @@ const Input={
     document.addEventListener('contextmenu',block);
     document.addEventListener('dragstart',block);
     document.addEventListener('selectstart',block);
+    document.addEventListener('touchstart',block,{passive:false,capture:true});
   },
   bindDepthGauge(){
     const gauge=UI.$('depthGauge');
@@ -89,6 +90,7 @@ const Input={
     const btn=UI.$('castBtn');
     btn.addEventListener('contextmenu',ev=>ev.preventDefault());
     btn.addEventListener('dragstart',ev=>ev.preventDefault());
+    btn.addEventListener('touchstart',ev=>ev.preventDefault(),{passive:false,capture:true});
     btn.addEventListener('pointerdown',ev=>{
       if(!this.shouldUsePointer(ev))return;
       if(game.state===GameState.HIT){

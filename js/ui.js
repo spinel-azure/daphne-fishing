@@ -7,7 +7,9 @@ const UI={
     gauge:null,
     ctx:null,
     progress:0,
-    active:false
+    active:false,
+    image:null,
+    imageReady:false
   },
   setTension(v){
     game.tension=clamp(v,0,100);
@@ -144,6 +146,7 @@ const UI={
   resizeActionButton(){
     const canvas=this.$('castGaugeCanvas');
     if(!canvas)return;
+    this.ensureCastButtonImage();
     const rect=canvas.getBoundingClientRect();
     const dpr=window.devicePixelRatio||1;
     const w=Math.max(1,Math.round(rect.width*dpr));
@@ -154,6 +157,38 @@ const UI={
       const ctx=canvas.getContext('2d');
       ctx.setTransform(dpr,0,0,dpr,0,0);
     }
+    this.clearCastGauge();
+  },
+  ensureCastButtonImage(){
+    if(this.actionButton.image)return;
+    const img=new Image();
+    img.draggable=false;
+    img.onload=()=>{
+      this.actionButton.imageReady=true;
+      this.clearCastGauge();
+    };
+    img.src='images/cast_button.png';
+    this.actionButton.image=img;
+  },
+  drawCastButtonBase(ctx,rect){
+    this.ensureCastButtonImage();
+    const img=this.actionButton.image;
+    if(!img||!this.actionButton.imageReady)return;
+    const boxW=rect.width/1.22;
+    const boxH=rect.height/1.22;
+    const imageRatio=img.naturalWidth/img.naturalHeight;
+    const boxRatio=boxW/boxH;
+    const drawW=boxRatio>imageRatio?boxH*imageRatio:boxW;
+    const drawH=boxRatio>imageRatio?boxH:boxW/imageRatio;
+    const x=(rect.width-drawW)/2;
+    const y=(rect.height-drawH)/2;
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.58)';
+    ctx.shadowBlur=0;
+    ctx.shadowOffsetY=Math.max(3,drawH*.03);
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(img,x,y,drawW,drawH);
+    ctx.restore();
   },
   castGaugeColor(value,failed=false){
     if(failed||value>=100)return '#ff3d35';
@@ -168,6 +203,7 @@ const UI={
     const ctx=canvas.getContext('2d');
     const rect=canvas.getBoundingClientRect();
     ctx.clearRect(0,0,rect.width,rect.height);
+    this.drawCastButtonBase(ctx,rect);
     const value=clamp(power,0,100);
     if(value<=0&&!failed)return;
     const cx=rect.width/2;
@@ -196,6 +232,7 @@ const UI={
     const ctx=canvas.getContext('2d');
     const rect=canvas.getBoundingClientRect();
     ctx.clearRect(0,0,rect.width,rect.height);
+    this.drawCastButtonBase(ctx,rect);
   },
   showResult(ok,reason){
     this.$('result').style.display='flex';
