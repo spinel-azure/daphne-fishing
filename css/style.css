@@ -184,3 +184,32 @@ html[lang="en"] .helpStep p{font-size:clamp(14px,3.6vw,19px);line-height:1.42}
   .helpCastIcon{width:56px;height:56px}
   .helpHitIcon{height:70px}
 }
+
+.versionBadge{
+  position:absolute;
+  right:12px;
+  bottom:10px;
+  z-index:2;
+  color:#ffe86a;
+  font-size:15px;
+  line-height:1;
+  letter-spacing:0;
+  text-shadow:2px 2px 0 #000;
+  pointer-events:none;
+}
+
+.titleScene .saveNotice{
+  bottom:38px;
+}
+
+@media (max-height:680px){
+  .versionBadge{
+    right:10px;
+    bottom:8px;
+    font-size:13px;
+  }
+
+  .titleScene .saveNotice{
+    bottom:34px;
+  }
+}
