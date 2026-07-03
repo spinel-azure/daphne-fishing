@@ -6,6 +6,8 @@ const I18N={
       titleContinue:'つづきから',
       titleHowTo:'あそびかた',
       titleOptions:'オプション',
+      titleNotice:'おしらせ',
+      ambienceStartNotice:'ゲームを始めると環境音が流れます。<br>あらかじめオプションで設定してください。',
       saveNotice:'セーブデータはこのブラウザに自動保存されます。<br>ブラウザのキャッシュやサイトデータを削除すると、セーブデータが消える場合があります。',
       helpTitle:'あそびかた',
       helpPages:[
@@ -30,6 +32,11 @@ const I18N={
         ]
       ],
       optionsTitle:'オプション',
+      noticeTitle:'おしらせ',
+      noticePages:[[ 
+        '・2026-07-02：バージョン表記（MVP1.0）',
+        '・2026-07-03：環境音を実装（MVP1.1）'
+      ]],
       language:'言語選択',
       japanese:'日本語',
       english:'英語',
@@ -70,6 +77,9 @@ const I18N={
       titleContinue:'CONTINUE',
       titleHowTo:'HOW TO PLAY',
       titleOptions:'OPTIONS',
+      titleNotice:'NEWS',
+      ambienceStartNotice:'ゲームを始めると環境音が流れます。<br>あらかじめオプションで設定してください。',
+      ambienceStartNotice:'Ambience starts after beginning the game.<br>Please adjust it in Options first.',
       saveNotice:'Save data is stored automatically in this browser.<br>Clearing browser cache or site data may delete your save data.',
       helpTitle:'HOW TO PLAY',
       helpPages:[
@@ -94,6 +104,11 @@ const I18N={
         ]
       ],
       optionsTitle:'OPTIONS',
+      noticeTitle:'NEWS',
+      noticePages:[[ 
+        '- 2026-07-02: Added version display (MVP1.0)',
+        '- 2026-07-03: Added ambience audio (MVP1.1)'
+      ]],
       language:'Language',
       japanese:'Japanese',
       english:'English',
@@ -158,11 +173,13 @@ const I18N={
     document.querySelector('[data-title-action="continue"]')?.replaceChildren(document.createTextNode(this.t('titleContinue')));
     document.querySelector('[data-title-action="howto"]')?.replaceChildren(document.createTextNode(this.t('titleHowTo')));
     document.querySelector('[data-title-action="options"]')?.replaceChildren(document.createTextNode(this.t('titleOptions')));
+    document.querySelector('[data-title-action="notice"]')?.replaceChildren(document.createTextNode(this.t('titleNotice')));
     const notice=document.querySelector('.saveNotice');
     if(notice)notice.innerHTML=this.t('saveNotice');
     document.querySelectorAll('.helpTitle').forEach(el=>el.textContent=this.t('helpTitle'));
     this.applyHelpPages();
     this.setText('optionTitle',this.t('optionsTitle'));
+    this.setText('noticeTitle',this.t('noticeTitle'));
     this.setText('optionLanguageLabel',this.t('language'));
     this.setText('optionJapaneseLabel',this.t('japanese'));
     this.setText('optionEnglishLabel',this.t('english'));

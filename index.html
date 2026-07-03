@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Daphne Fishing(MVP)</title>
-<link rel="stylesheet" href="css/style.css?v=20260703-amb2">
+<link rel="stylesheet" href="css/style.css?v=20260703-notice1">
 </head>
 <body>
 <div id="wrap">
@@ -32,10 +32,12 @@
         <button class="titleMenuItem is-disabled" type="button" data-title-action="continue" disabled>つづきから</button>
         <button class="titleMenuItem" type="button" data-title-action="howto">あそびかた</button>
         <button class="titleMenuItem" type="button" data-title-action="options">オプション</button>
+        <button class="titleMenuItem" type="button" data-title-action="notice">おしらせ</button>
       </nav>
     </div>
+    <p id="ambienceNotice" class="ambienceNotice">ゲームを始めると環境音が流れます。<br>あらかじめオプションで設定してください。</p>
     <p class="saveNotice">セーブデータはこのブラウザに自動保存されます。<br>ブラウザのキャッシュやサイトデータを削除すると、セーブデータが消える場合があります。</p>
-    <span id="versionBadge" class="versionBadge" aria-label="version">MVP1.0</span>
+    <span id="versionBadge" class="versionBadge" aria-label="version">MVP1.1</span>
   </section>
 
   <section id="optionScene" class="optionScene is-hidden" aria-label="Options">
@@ -73,6 +75,23 @@
     </div>
   </section>
 
+  <section id="noticeScene" class="noticeScene is-hidden" aria-label="Notices">
+    <div class="noticePanel">
+      <h1 id="noticeTitle" class="noticeTitle">おしらせ</h1>
+      <article class="noticePage is-active" data-notice-page="0">
+        <div id="noticeBody" class="noticeBody">
+          <p>・2026-07-02：バージョン表記（MVP1.0）</p>
+          <p>・2026-07-03：環境音を実装（MVP1.1）</p>
+        </div>
+      </article>
+      <div class="noticeNav">
+        <button id="noticeTitleBtn" class="helpNavButton noticeTitleButton" type="button" data-i18n-title-button>TITLE</button>
+        <button id="noticePrevBtn" class="helpNavButton noticePrevButton is-hidden" type="button" data-i18n-prev-button>PREV</button>
+        <span id="noticePageText" class="helpPageText noticePageText">1/1</span>
+        <button id="noticeNextBtn" class="helpNavButton noticeNextButton is-hidden" type="button" data-i18n-next-button>NEXT</button>
+      </div>
+    </div>
+  </section>
   <section id="helpScene" class="helpScene is-hidden" aria-label="How to play">
     <div class="helpPanel">
       <h1 class="helpTitle">あそびかた</h1>
@@ -177,17 +196,17 @@
   </div>
 </div>
 
-<script src="js/i18n.js?v=20260703-amb2"></script>
-<script src="js/audio_manager.js?v=20260703-amb2"></script>
-<script src="js/ui.js?v=20260703-amb2"></script>
-<script src="js/fish.js?v=20260703-amb2"></script>
-<script src="js/effects.js?v=20260703-amb2"></script>
-<script src="js/water.js?v=20260703-amb2"></script>
-<script src="js/tree_wind.js?v=20260703-amb2"></script>
-<script src="js/rod.js?v=20260703-amb2"></script>
-<script src="js/device.js?v=20260703-amb2"></script>
-<script src="js/input.js?v=20260703-amb2"></script>
-<script src="js/title.js?v=20260703-amb2"></script>
-<script src="js/main.js?v=20260703-amb2"></script>
+<script src="js/i18n.js?v=20260703-notice1"></script>
+<script src="js/audio_manager.js?v=20260703-notice1"></script>
+<script src="js/ui.js?v=20260703-notice1"></script>
+<script src="js/fish.js?v=20260703-notice1"></script>
+<script src="js/effects.js?v=20260703-notice1"></script>
+<script src="js/water.js?v=20260703-notice1"></script>
+<script src="js/tree_wind.js?v=20260703-notice1"></script>
+<script src="js/rod.js?v=20260703-notice1"></script>
+<script src="js/device.js?v=20260703-notice1"></script>
+<script src="js/input.js?v=20260703-notice1"></script>
+<script src="js/title.js?v=20260703-notice1"></script>
+<script src="js/main.js?v=20260703-notice1"></script>
 </body>
 </html>

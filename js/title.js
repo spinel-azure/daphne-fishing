@@ -91,6 +91,10 @@ const TitleScene={
       OptionScene.show();
       return;
     }
+    if(action==='notice'){
+      NoticeScene.show(0);
+      return;
+    }
     if(action!=='start')return;
     item.classList.remove('cursor-flash');
     void item.offsetWidth;
@@ -215,6 +219,73 @@ const HelpScene={
 
 window.addEventListener('DOMContentLoaded',()=>HelpScene.init());
 
+const NoticeScene={
+  scene:null,
+  page:0,
+  init(){
+    this.scene=document.getElementById('noticeScene');
+    if(!this.scene)return;
+    document.getElementById('noticeTitleBtn')?.addEventListener('click',()=>this.returnTitle());
+    document.getElementById('noticePrevBtn')?.addEventListener('click',()=>this.prevPage());
+    document.getElementById('noticeNextBtn')?.addEventListener('click',()=>this.nextPage());
+    window.addEventListener('keydown',ev=>{
+      if(this.scene.classList.contains('is-hidden'))return;
+      if(ev.key==='ArrowRight'||ev.key==='Right'){
+        ev.preventDefault();
+        this.nextPage();
+      }else if(ev.key==='ArrowLeft'||ev.key==='Left'){
+        ev.preventDefault();
+        this.prevPage();
+      }else if(ev.key==='Escape'){
+        ev.preventDefault();
+        this.returnTitle();
+      }
+    });
+    this.showPage(0);
+  },
+  get pages(){
+    return I18N.dict[I18N.lang]?.noticePages??I18N.dict.ja.noticePages??[[]];
+  },
+  show(index=0){
+    if(!this.scene)return;
+    TitleScene.active=false;
+    this.scene.classList.remove('is-hidden');
+    this.showPage(index);
+  },
+  showPage(index){
+    const max=Math.max(0,this.pages.length-1);
+    this.page=clamp(Math.round(index),0,max);
+    this.render();
+  },
+  render(){
+    if(!this.scene)return;
+    const body=document.getElementById('noticeBody');
+    const pageText=document.getElementById('noticePageText');
+    const prevBtn=document.getElementById('noticePrevBtn');
+    const nextBtn=document.getElementById('noticeNextBtn');
+    const pages=this.pages;
+    const lines=I18N.noticePageText?.(this.page)??pages[this.page]??[];
+    if(body)body.innerHTML=lines.map(text=>`<p>${text}</p>`).join('');
+    if(pageText)pageText.textContent=`${this.page+1}/${pages.length}`;
+    if(prevBtn)prevBtn.classList.toggle('is-hidden',this.page<=0);
+    if(nextBtn)nextBtn.classList.toggle('is-hidden',this.page>=pages.length-1);
+  },
+  nextPage(){
+    if(this.page>=this.pages.length-1)return;
+    this.showPage(this.page+1);
+  },
+  prevPage(){
+    if(this.page<=0)return;
+    this.showPage(this.page-1);
+  },
+  returnTitle(){
+    if(!this.scene)return;
+    this.scene.classList.add('is-hidden');
+    TitleScene.returnToTitle();
+  }
+};
+
+window.addEventListener('DOMContentLoaded',()=>NoticeScene.init());
 const OptionScene={
   scene:null,
   init(){
