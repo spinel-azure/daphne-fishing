@@ -32,7 +32,7 @@ const Device={
   },
   acceptsPointer(ev){
     if(!ev||!ev.pointerType)return true;
-    if(this.isTouchMode())return ev.pointerType==='touch'||ev.pointerType==='pen';
+    if(this.isTouchMode())return ev.pointerType==='touch'||ev.pointerType==='pen'||ev.pointerType==='mouse';
     return ev.pointerType==='mouse';
   }
 };

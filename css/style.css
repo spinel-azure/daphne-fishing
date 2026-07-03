@@ -213,3 +213,17 @@ html[lang="en"] .helpStep p{font-size:clamp(14px,3.6vw,19px);line-height:1.42}
     bottom:34px;
   }
 }
+.optionAmbienceRow{grid-template-columns:1fr minmax(0,2fr);align-items:start}
+.optionAmbienceControls{min-width:0;display:grid;gap:10px}
+.optionAmbienceRadios{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.optionVolumeWrap{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0}
+.optionVolume{width:100%;accent-color:#ffe86a;touch-action:pan-x}
+.optionVolumeText{min-width:48px;text-align:right;color:#ffe86a;text-shadow:2px 2px #00105c}
+.optionVolumeWrap.is-disabled{opacity:.45;filter:grayscale(1)}
+.optionVolumeWrap.is-disabled .optionVolume{cursor:not-allowed}
+@media(max-width:420px){
+  .optionAmbienceRow{grid-template-columns:1fr;gap:8px}
+  .optionAmbienceControls{padding-left:34px;gap:8px}
+  .optionAmbienceRadios{gap:14px}
+  .optionVolumeWrap{grid-template-columns:minmax(0,1fr) 44px}
+}

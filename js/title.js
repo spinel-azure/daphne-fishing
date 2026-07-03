@@ -226,6 +226,16 @@ const OptionScene={
         if(input.checked)I18N.setLang(input.value);
       });
     });
+    document.querySelectorAll('input[name="ambienceEnabled"]').forEach(input=>{
+      input.addEventListener('change',()=>{
+        if(input.checked)AudioManager.setAmbienceEnabled(input.value==='on');
+        this.syncAmbienceControls();
+      });
+    });
+    document.getElementById('ambienceVolume')?.addEventListener('input',ev=>{
+      AudioManager.setAmbienceVolume(Number(ev.currentTarget.value)/100);
+      this.syncAmbienceControls();
+    });
     window.addEventListener('keydown',ev=>{
       if(this.scene.classList.contains('is-hidden'))return;
       if(ev.key==='Escape'){
@@ -233,11 +243,30 @@ const OptionScene={
         this.returnTitle();
       }
     });
+    this.syncAmbienceControls();
   },
   show(){
     if(!this.scene)return;
     TitleScene.active=false;
+    this.syncAmbienceControls();
     this.scene.classList.remove('is-hidden');
+  },
+  syncAmbienceControls(){
+    if(typeof AudioManager==='undefined')return;
+    const settings=AudioManager.getAmbienceSettings();
+    document.querySelectorAll('input[name="ambienceEnabled"]').forEach(input=>{
+      input.checked=input.value===(settings.ambienceEnabled?'on':'off');
+    });
+    const volume=document.getElementById('ambienceVolume');
+    const volumeText=document.getElementById('ambienceVolumeText');
+    const volumeWrap=document.querySelector('.optionVolumeWrap');
+    const percent=Math.round(settings.ambienceVolume*100);
+    if(volume){
+      volume.value=String(percent);
+      volume.disabled=!settings.ambienceEnabled;
+    }
+    if(volumeText)volumeText.textContent=`${percent}%`;
+    if(volumeWrap)volumeWrap.classList.toggle('is-disabled',!settings.ambienceEnabled);
   },
   returnTitle(){
     if(!this.scene)return;

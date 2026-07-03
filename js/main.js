@@ -239,6 +239,7 @@ const Game={
     Rod.drawLine();
   },
   reset(){
+    AudioManager.playAmbience('kaigan3');
     this.setState(GameState.READY);
     game.fight=null;
     game.biteTimer=0;

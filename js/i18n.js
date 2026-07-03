@@ -35,6 +35,10 @@ const I18N={
       english:'英語',
       bgm:'BGM',
       se:'SE',
+      ambience:'環境音',
+      ambienceOn:'ON',
+      ambienceOff:'OFF',
+      ambienceVolume:'環境音の音量',
       notReady:'未実装',
       titleButton:'TITLE',
       prevButton:'PREV',
@@ -95,6 +99,10 @@ const I18N={
       english:'English',
       bgm:'BGM',
       se:'SE',
+      ambience:'Ambience',
+      ambienceOn:'ON',
+      ambienceOff:'OFF',
+      ambienceVolume:'Ambience volume',
       notReady:'Not yet',
       titleButton:'TITLE',
       prevButton:'PREV',
@@ -160,6 +168,11 @@ const I18N={
     this.setText('optionEnglishLabel',this.t('english'));
     this.setText('optionBgmLabel',this.t('bgm'));
     this.setText('optionSeLabel',this.t('se'));
+    this.setText('optionAmbienceLabel',this.t('ambience'));
+    this.setText('optionAmbienceOnLabel',this.t('ambienceOn'));
+    this.setText('optionAmbienceOffLabel',this.t('ambienceOff'));
+    const ambienceVolume=document.getElementById('ambienceVolume');
+    if(ambienceVolume)ambienceVolume.setAttribute('aria-label',this.t('ambienceVolume'));
     document.querySelectorAll('.optionNotReady').forEach(el=>el.textContent=this.t('notReady'));
     document.querySelectorAll('[data-i18n-title-button]').forEach(el=>el.textContent=this.t('titleButton'));
     document.querySelectorAll('[data-i18n-prev-button]').forEach(el=>el.textContent=this.t('prevButton'));

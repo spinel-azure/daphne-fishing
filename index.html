@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Daphne Fishing(MVP)</title>
-<link rel="stylesheet" href="css/style.css?v=20260702-version1">
+<link rel="stylesheet" href="css/style.css?v=20260703-amb2">
 </head>
 <body>
 <div id="wrap">
@@ -46,6 +46,19 @@
           <span id="optionLanguageLabel" class="optionLabel">言語選択</span>
           <label class="optionRadio"><input type="radio" name="lang" value="ja" checked><span id="optionJapaneseLabel">日本語</span></label>
           <label class="optionRadio"><input type="radio" name="lang" value="en"><span id="optionEnglishLabel">英語</span></label>
+        </div>
+        <div class="optionRow optionAmbienceRow">
+          <span id="optionAmbienceLabel" class="optionLabel">環境音</span>
+          <div class="optionAmbienceControls">
+            <div class="optionAmbienceRadios">
+              <label class="optionRadio"><input type="radio" name="ambienceEnabled" value="on" checked><span id="optionAmbienceOnLabel">ON</span></label>
+              <label class="optionRadio"><input type="radio" name="ambienceEnabled" value="off"><span id="optionAmbienceOffLabel">OFF</span></label>
+            </div>
+            <label class="optionVolumeWrap">
+              <input id="ambienceVolume" class="optionVolume" type="range" min="0" max="100" step="1" value="20" aria-label="Ambience volume">
+              <span id="ambienceVolumeText" class="optionVolumeText">20%</span>
+            </label>
+          </div>
         </div>
         <div class="optionRow">
           <span id="optionBgmLabel" class="optionLabel">BGM</span>
@@ -164,16 +177,17 @@
   </div>
 </div>
 
-<script src="js/i18n.js?v=20260702-version1"></script>
-<script src="js/ui.js?v=20260702-version1"></script>
-<script src="js/fish.js?v=20260702-version1"></script>
-<script src="js/effects.js?v=20260702-version1"></script>
-<script src="js/water.js?v=20260702-version1"></script>
-<script src="js/tree_wind.js?v=20260702-version1"></script>
-<script src="js/rod.js?v=20260702-version1"></script>
-<script src="js/device.js?v=20260702-version1"></script>
-<script src="js/input.js?v=20260702-version1"></script>
-<script src="js/title.js?v=20260702-version1"></script>
-<script src="js/main.js?v=20260702-version1"></script>
+<script src="js/i18n.js?v=20260703-amb2"></script>
+<script src="js/audio_manager.js?v=20260703-amb2"></script>
+<script src="js/ui.js?v=20260703-amb2"></script>
+<script src="js/fish.js?v=20260703-amb2"></script>
+<script src="js/effects.js?v=20260703-amb2"></script>
+<script src="js/water.js?v=20260703-amb2"></script>
+<script src="js/tree_wind.js?v=20260703-amb2"></script>
+<script src="js/rod.js?v=20260703-amb2"></script>
+<script src="js/device.js?v=20260703-amb2"></script>
+<script src="js/input.js?v=20260703-amb2"></script>
+<script src="js/title.js?v=20260703-amb2"></script>
+<script src="js/main.js?v=20260703-amb2"></script>
 </body>
 </html>
