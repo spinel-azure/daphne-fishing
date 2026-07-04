@@ -5,6 +5,7 @@ const I18N={
       titleStart:'はじめる',
       titleContinue:'つづきから',
       titleHowTo:'あそびかた',
+      titleDex:'さかなずかん',
       titleOptions:'オプション',
       titleNotice:'おしらせ',
       ambienceStartNotice:'ゲームを始めると環境音が流れます。<br>あらかじめオプションで設定してください。',
@@ -35,7 +36,8 @@ const I18N={
       noticeTitle:'おしらせ',
       noticePages:[[ 
         '・2026-07-02：バージョン表記（MVP1.0）',
-        '・2026-07-03：環境音を実装（MVP1.1）'
+        '・2026-07-03：環境音を実装（MVP1.1）',
+        '・2026-07-04：バランス調整・さかなずかん追加（MVP1.2）'
       ]],
       language:'言語選択',
       japanese:'日本語',
@@ -69,13 +71,15 @@ const I18N={
       tensionBreak:'テンション限界！ 糸が切れた！',
       looseFail:'テンション不足！ 魚が逃げた！',
       caught:name=>`${name}を釣り上げた！`,
-      resultInfo:(rare,depth)=>`レア度 ${rare} / タナ ${depth}m`,
+      resultInfo:(rare,depth,size)=>size>0?`サイズ ${size}cm / タナ ${depth}m`:`タナ ${depth}m`,
+      newRecord:'最大サイズ更新！',
       retry:'もう一度挑戦しよう。'
     },
     en:{
       titleStart:'START',
       titleContinue:'CONTINUE',
       titleHowTo:'HOW TO PLAY',
+      titleDex:'FISH DEX',
       titleOptions:'OPTIONS',
       titleNotice:'NEWS',
       ambienceStartNotice:'ゲームを始めると環境音が流れます。<br>あらかじめオプションで設定してください。',
@@ -107,7 +111,8 @@ const I18N={
       noticeTitle:'NEWS',
       noticePages:[[ 
         '- 2026-07-02: Added version display (MVP1.0)',
-        '- 2026-07-03: Added ambience audio (MVP1.1)'
+        '- 2026-07-03: Added ambience audio (MVP1.1)',
+        '- 2026-07-04: Balance adjustments and Fish Dex added (MVP1.2)'
       ]],
       language:'Language',
       japanese:'Japanese',
@@ -141,7 +146,8 @@ const I18N={
       tensionBreak:'Tension limit! The line snapped!',
       looseFail:'Too little tension! The fish escaped!',
       caught:name=>`Caught ${name}!`,
-      resultInfo:(rare,depth)=>`Rarity ${rare} / Depth ${depth}m`,
+      resultInfo:(rare,depth,size)=>size>0?`Size ${size}cm / Depth ${depth}m`:`Depth ${depth}m`,
+      newRecord:'NEW RECORD!',
       retry:'Try again.'
     }
   },
@@ -172,6 +178,7 @@ const I18N={
     document.querySelector('[data-title-action="start"]')?.replaceChildren(document.createTextNode(this.t('titleStart')));
     document.querySelector('[data-title-action="continue"]')?.replaceChildren(document.createTextNode(this.t('titleContinue')));
     document.querySelector('[data-title-action="howto"]')?.replaceChildren(document.createTextNode(this.t('titleHowTo')));
+    document.querySelector('[data-title-action="dex"]')?.replaceChildren(document.createTextNode(this.t('titleDex')));
     document.querySelector('[data-title-action="options"]')?.replaceChildren(document.createTextNode(this.t('titleOptions')));
     document.querySelector('[data-title-action="notice"]')?.replaceChildren(document.createTextNode(this.t('titleNotice')));
     const notice=document.querySelector('.saveNotice');

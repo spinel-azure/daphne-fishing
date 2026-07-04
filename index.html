@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Daphne Fishing(MVP)</title>
-<link rel="stylesheet" href="css/style.css?v=20260703-notice1">
+<link rel="stylesheet" href="css/style.css?v=20260704-title-notice-size1">
 <!-- pages redeploy 2026-07-03 -->
 </head>
 <body>
@@ -32,15 +32,45 @@
         <button class="titleMenuItem is-active" type="button" data-title-action="start">はじめる</button>
         <button class="titleMenuItem is-disabled" type="button" data-title-action="continue" disabled>つづきから</button>
         <button class="titleMenuItem" type="button" data-title-action="howto">あそびかた</button>
+        <button class="titleMenuItem" type="button" data-title-action="dex">さかなずかん</button>
         <button class="titleMenuItem" type="button" data-title-action="options">オプション</button>
         <button class="titleMenuItem" type="button" data-title-action="notice">おしらせ</button>
       </nav>
     </div>
     <p id="ambienceNotice" class="ambienceNotice">ゲームを始めると環境音が流れます。<br>あらかじめオプションで設定してください。</p>
     <p class="saveNotice">セーブデータはこのブラウザに自動保存されます。<br>ブラウザのキャッシュやサイトデータを削除すると、セーブデータが消える場合があります。</p>
-    <span id="versionBadge" class="versionBadge" aria-label="version">MVP1.1</span>
+    <span id="versionBadge" class="versionBadge" aria-label="version">MVP1.2</span>
   </section>
 
+
+  <section id="dexScene" class="dexScene is-hidden" aria-label="Fish encyclopedia">
+    <div class="dexPanel">
+      <h1 id="dexTitle" class="dexTitle">さかなずかん</h1>
+      <article id="dexListView" class="dexListView">
+        <div id="dexList" class="dexList"></div>
+      </article>
+      <article id="dexDetailView" class="dexDetailView is-hidden">
+        <div class="dexDetailHead"><span id="dexDetailNo"></span><strong id="dexDetailName"></strong></div>
+        <div id="dexDetailIcon" class="dexDetailIcon is-silhouette">?</div>
+        <dl class="dexStats">
+          <div><dt>釣った数</dt><dd id="dexDetailCount">？？？？？</dd></div>
+          <div><dt>最大サイズ</dt><dd id="dexDetailMax">？？？？？</dd></div>
+        </dl>
+        <section class="dexTextBlock">
+          <h2>■ 特長 ■</h2>
+          <p id="dexDetailDescription">？？？？？</p>
+        </section>
+        <section class="dexTextBlock">
+          <h2>■ おいしい食べ方 ■</h2>
+          <p id="dexDetailCooking">？？？？？</p>
+        </section>
+      </article>
+      <div class="dexNav">
+        <button id="dexTitleBtn" class="helpNavButton dexTitleButton" type="button" data-i18n-title-button>TITLE</button>
+        <button id="dexBackBtn" class="helpNavButton dexBackButton is-hidden" type="button">BACK</button>
+      </div>
+    </div>
+  </section>
   <section id="optionScene" class="optionScene is-hidden" aria-label="Options">
     <div class="optionPanel">
       <h1 id="optionTitle" class="optionTitle">オプション</h1>
@@ -83,6 +113,7 @@
         <div id="noticeBody" class="noticeBody">
           <p>・2026-07-02：バージョン表記（MVP1.0）</p>
           <p>・2026-07-03：環境音を実装（MVP1.1）</p>
+          <p>・2026-07-04：バランス調整・さかなずかん追加（MVP1.2）</p>
         </div>
       </article>
       <div class="noticeNav">
@@ -191,23 +222,25 @@
       <div id="resultEmoji" class="bigFish">FISH</div>
       <div id="resultTitle" class="fishName">Caught!</div>
       <div id="resultInfo" class="small"></div>
+      <div id="resultRecord" class="resultRecord"></div>
       <br>
       <button id="againBtn">AGAIN</button>
     </div>
   </div>
 </div>
 
-<script src="js/i18n.js?v=20260703-notice1"></script>
-<script src="js/audio_manager.js?v=20260703-notice1"></script>
-<script src="js/ui.js?v=20260703-notice1"></script>
-<script src="js/fish.js?v=20260703-notice1"></script>
-<script src="js/effects.js?v=20260703-notice1"></script>
-<script src="js/water.js?v=20260703-notice1"></script>
-<script src="js/tree_wind.js?v=20260703-notice1"></script>
-<script src="js/rod.js?v=20260703-notice1"></script>
-<script src="js/device.js?v=20260703-notice1"></script>
-<script src="js/input.js?v=20260703-notice1"></script>
-<script src="js/title.js?v=20260703-notice1"></script>
-<script src="js/main.js?v=20260703-notice1"></script>
+<script src="js/i18n.js?v=20260704-dexsilhouette1"></script>
+<script src="js/audio_manager.js?v=20260704-dexsilhouette1"></script>
+<script src="js/ui.js?v=20260704-dexsilhouette1"></script>
+<script src="js/fish.js?v=20260704-dexsilhouette1"></script>
+<script src="js/dex.js?v=20260704-dexsilhouette1"></script>
+<script src="js/effects.js?v=20260704-dexsilhouette1"></script>
+<script src="js/water.js?v=20260704-dexsilhouette1"></script>
+<script src="js/tree_wind.js?v=20260704-dexsilhouette1"></script>
+<script src="js/rod.js?v=20260704-dexsilhouette1"></script>
+<script src="js/device.js?v=20260704-dexsilhouette1"></script>
+<script src="js/input.js?v=20260704-dexsilhouette1"></script>
+<script src="js/title.js?v=20260704-title-save-state1"></script>
+<script src="js/main.js?v=20260704-dexsilhouette1"></script>
 </body>
 </html>

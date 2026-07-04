@@ -24,7 +24,8 @@ const game={
   castDistanceRate:50,
   castTarget:null,
   castStart:0,
-  castFailed:false
+  castFailed:false,
+  bait:'any'
 };
 
 const Game={
@@ -202,13 +203,18 @@ const Game={
   },
   hook(){
     if(game.state!==GameState.HIT)return;
-    const f=FishDB.pick(game.depth,game.castDistanceRate);
-    const maxHp=Math.round((f.trash?18:58)+f.pow*38+game.depth*3);
-    const distance=game.depth*1.3+f.pow*8.5+rand(5,8);
+    const currentBait=FishDB.currentBait?.()??game.bait;
+    game.bait=currentBait;
+    const f=FishDB.pick(game.depth,game.castDistanceRate,currentBait);
+    const fishPower=f.fightPow??FishDB.battlePower?.(f)??f.pow;
+    const fishStamina=Number(f.stamina)||0;
+    const maxHp=Math.round(f.trash?12:Math.max(18,fishStamina*.55)+fishPower*14+game.depth*1.4);
+    const castMeters=UI.castDistanceMeters(game.castDistanceRate);
+    const distance=Math.max(.8,Math.sqrt(castMeters*castMeters+game.depth*game.depth));
     game.fight={
       fish:f,
       distance,
-      maxDistance:distance,
+      maxDistance:Math.max(distance,.8),
       hp:maxHp,
       maxHp,
       startX:game.bob.x,
@@ -222,7 +228,8 @@ const Game={
     UI.$('fishEmoji').style.display='block';
     UI.$('fishEmoji').style.left=game.bob.x+'px';
     UI.$('fishEmoji').style.top=(game.bob.y+45)+'px';
-    UI.setTension(48);
+    UI.setTension(20);
+    UI.setFightDistance(distance);
     UI.log(I18N.t('hooked'));
     Effects.addRipple(game.bob.x,game.bob.y,true);
   },
@@ -234,6 +241,10 @@ const Game={
     UI.$('splash').style.display='none';
     UI.$('bobber').style.display='none';
     UI.$('fishEmoji').style.display='none';
+    if(ok&&game.fight?.fish){
+      const record=FishDB.recordCatch?.(game.fight.fish);
+      if(record)Object.assign(game.fight.fish,record);
+    }
     UI.showResult(ok,reason);
     game.fight=null;
     Rod.drawLine();
@@ -289,6 +300,9 @@ const Game={
       if(game.biteTimer<=0)this.finish(false,I18N.t('hookFail'));
     }else if(game.state===GameState.BATTLE&&game.fight){
       const f=game.fight.fish;
+      const fishPower=f.fightPow??FishDB.battlePower?.(f)??f.pow;
+      const fishStamina=Number(f.stamina)||0;
+      const staminaRate=clamp(fishStamina/160,.25,1.4);
       const hpRate=clamp(game.fight.hp/game.fight.maxHp,0,1);
       const tired=1-hpRate;
       const reelHeld=Rod.isReelHeld();
@@ -302,13 +316,14 @@ const Game={
       if(reelHeld){
         UI.setTension(game.tension-dt*(f.trash?6.5:3.5));
       }else{
-        Rod.updateHandle(Rod.reelAngle-dt*(4.2+f.pow*.75));
-        game.fight.distance+=dt*(.65+f.pow*.42)*(.72+.28*hpRate);
-        UI.setTension(game.tension-dt*(f.trash?26:18+f.pow*3.2));
+        Rod.updateHandle(Rod.reelAngle-dt*(4.2+fishPower*.75));
+        game.fight.distance+=dt*(.18+fishPower*.16)*(.58+.22*hpRate)*(0.9+staminaRate*.08);
+        UI.setTension(game.tension-dt*(f.trash?24:16+fishPower*2.2));
       }
       game.fight.distance=Math.max(0,game.fight.distance);
-      game.fight.distance=Math.min(game.fight.distance,game.fight.maxDistance*1.35);
-      if(game.fight.distance<.5)game.fight.distance=0;
+      game.fight.distance=Math.min(game.fight.distance,Math.min(36,game.fight.maxDistance*1.12));
+      if(game.fight.distance<.05)game.fight.distance=0;
+      UI.setFightDistance(game.fight.distance);
       if(game.tension>=100){
         this.finish(false,I18N.t('tensionBreak'));
         requestAnimationFrame(t=>this.tick(t));

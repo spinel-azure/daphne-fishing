@@ -18,6 +18,7 @@ const TitleScene={
       item.addEventListener('touchstart',()=>this.setIndex(i),{passive:true});
       item.addEventListener('pointerenter',()=>this.setIndex(i));
     });
+    this.syncSaveState();
     window.addEventListener('keydown',ev=>{
       if(!this.active)return;
       if(ev.key==='ArrowDown'||ev.key==='Down'){
@@ -31,7 +32,35 @@ const TitleScene={
         this.chooseOnce(this.index);
       }
     });
-    this.setIndex(0);
+    this.setIndex(this.firstEnabledIndex());
+  },
+  hasDexProgress(){
+    try{
+      const raw=localStorage.getItem('daphneFishingFishDex');
+      if(!raw)return false;
+      const dex=JSON.parse(raw);
+      if(!dex||typeof dex!=='object')return false;
+      return Object.values(dex).some(entry=>entry?.caught===true);
+    }catch(err){
+      return false;
+    }
+  },
+  setItemEnabled(action,enabled){
+    const item=this.items.find(el=>el.dataset.titleAction===action);
+    if(!item)return;
+    item.disabled=!enabled;
+    item.classList.toggle('is-disabled',!enabled);
+    item.setAttribute('aria-disabled',enabled?'false':'true');
+  },
+  syncSaveState(){
+    const hasProgress=this.hasDexProgress();
+    this.setItemEnabled('start',!hasProgress);
+    this.setItemEnabled('continue',hasProgress);
+    if(this.items[this.index]?.disabled)this.setIndex(this.firstEnabledIndex());
+  },
+  firstEnabledIndex(){
+    const index=this.items.findIndex(item=>!item.disabled);
+    return index>=0?index:0;
   },
   initLogoCanvas(){
     this.logoCanvas=document.getElementById('titleLogoCanvas');
@@ -65,6 +94,7 @@ const TitleScene={
     if(this.active)requestAnimationFrame(n=>this.drawLogo(n));
   },
   setIndex(i){
+    if(!this.items[i]||this.items[i].disabled)return;
     this.index=i;
     this.items.forEach((item,n)=>item.classList.toggle('is-active',n===i));
   },
@@ -87,6 +117,10 @@ const TitleScene={
       HelpScene.show(0);
       return;
     }
+    if(action==='dex'){
+      DexScene.show();
+      return;
+    }
     if(action==='options'){
       OptionScene.show();
       return;
@@ -95,7 +129,7 @@ const TitleScene={
       NoticeScene.show(0);
       return;
     }
-    if(action!=='start')return;
+    if(action!=='start'&&action!=='continue')return;
     item.classList.remove('cursor-flash');
     void item.offsetWidth;
     item.classList.add('cursor-flash');
@@ -103,7 +137,9 @@ const TitleScene={
   },
   chooseOnce(i){
     const item=this.items[i];
-    if(item?.dataset.titleAction!=='start'){
+    if(!item||item.disabled)return;
+    const action=item?.dataset.titleAction;
+    if(action!=='start'&&action!=='continue'){
       this.choose(i);
       return;
     }
@@ -122,6 +158,7 @@ const TitleScene={
     if(!this.scene)return;
     this.chosen=false;
     this.active=true;
+    this.syncSaveState();
     this.scene.style.display='flex';
     this.scene.classList.remove('is-hidden');
     this.setIndex(Math.min(this.index,this.items.length-1));

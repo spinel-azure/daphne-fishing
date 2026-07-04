@@ -28,12 +28,17 @@ const UI={
     }
     const value=clamp(rate,0,100);
     const meters=this.castDistanceMeters(value);
-    this.text('castDistanceText',failed?`${meters}m MISS`:`${meters}m`);
+    const label=meters.toFixed(1);
+    this.text('castDistanceText',failed?`${label}m MISS`:`${label}m`);
     this.setBackgroundZoom(meters);
   },
   castDistanceMeters(rate){
     const normalized=clamp(rate,0,100)/100;
-    return Math.round(5+normalized*75);
+    return Math.round(normalized*30*10)/10;
+  },
+  setFightDistance(meters){
+    const value=Math.max(0,Number(meters)||0);
+    this.text('castDistanceText',value.toFixed(1)+'m');
   },
   setBackgroundZoom(meters){
     const wrap=this.$('wrap');
@@ -42,7 +47,7 @@ const UI={
       wrap.style.setProperty('--bgZoom','1');
       return;
     }
-    const distanceRate=clamp((meters-5)/75,0,1);
+    const distanceRate=clamp(meters/30,0,1);
     const zoom=1+(Math.pow(1-distanceRate,1.75)*.36);
     wrap.style.setProperty('--bgZoom',zoom.toFixed(3));
   },
@@ -238,13 +243,16 @@ const UI={
   showResult(ok,reason){
     this.$('result').style.display='flex';
     if(ok){
-      this.text('resultEmoji',game.fight.fish.e);
-      this.text('resultTitle',I18N.t('caught',game.fight.fish.n));
-      this.text('resultInfo',I18N.t('resultInfo',game.fight.fish.rare,game.depth));
+      const fish=game.fight.fish;
+      this.text('resultEmoji',fish.e);
+      this.text('resultTitle',I18N.t('caught',fish.n));
+      this.text('resultInfo',I18N.t('resultInfo',fish.rare,game.depth,fish.sizeCm,fish));
+      this.text('resultRecord',fish.newRecord?I18N.t('newRecord'):'');
     }else{
       this.text('resultEmoji','💨');
       this.text('resultTitle',reason);
       this.text('resultInfo',I18N.t('retry'));
+      this.text('resultRecord','');
     }
   }
 };

@@ -1,3 +1,5 @@
+const REEL_DISTANCE_RATE=0.58;
+
 const Rod={
   lineCanvas:null,ctx:null,rodCanvas:null,angleDeg:-10,reelAngle:0,lastPointerAngle:null,currentRad:-Math.PI*.58,targetRad:-Math.PI*.58,currentAimAngle:0,targetAimAngle:0,lastAimTime:0,
   THREE:null,renderer:null,scene:null,camera:null,root:null,segments:[],guides:[],rodReady:false,renderScale:.5,segmentCount:14,segmentLength:32,minRad:-2.86,maxRad:-1.36,
@@ -257,16 +259,18 @@ const Rod={
     if(clockwise>0&&game.fight){
       const f=game.fight.fish;
       const hpRate=clamp(game.fight.hp/game.fight.maxHp,0,1);
+      const fishPower=f.fightPow??FishDB.battlePower?.(f)??Math.max(.18,(Number(f.pow)||0)/55);
       let zone=1;
       if(game.tension<28)zone=.28;
       else if(game.tension>84)zone=.42;
       else if(game.tension>=42&&game.tension<=68)zone=1.18;
-      const damage=clockwise*12.5*zone/(f.pow*.85);
-      const reelGain=clockwise*(.17+zone*.055)/(f.pow*.48);
+      const damage=clockwise*(8.5+zone*3.2)/(0.85+fishPower*.42);
+      const reelGain=clockwise*(.42+zone*.18)/(0.75+fishPower*.38)*REEL_DISTANCE_RATE;
       game.fight.hp=Math.max(0,game.fight.hp-damage);
       game.fight.distance=Math.max(0,game.fight.distance-reelGain);
-      if(game.fight.distance<.5)game.fight.distance=0;
-      UI.setTension(game.tension+clockwise*(2.3+f.pow*.9)*(.35+.65*hpRate));
+      if(game.fight.distance<.05)game.fight.distance=0;
+      UI.setFightDistance(game.fight.distance);
+      UI.setTension(game.tension+clockwise*(2.1+fishPower*1.4)*(.35+.65*hpRate));
       if(game.tension>=100){
         Game.finish(false,I18N.t('tensionBreak'));
         return;
