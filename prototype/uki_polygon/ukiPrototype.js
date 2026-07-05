@@ -49,9 +49,9 @@ function initUkiPrototype(){
   state.canvas=document.getElementById('ukiCanvas');
   if(!state.canvas)return;
 
-  state.renderer=new THREE.WebGLRenderer({canvas:state.canvas,antialias:true,alpha:false});
+  state.renderer=new THREE.WebGLRenderer({canvas:state.canvas,antialias:true,alpha:true});
   state.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-  state.renderer.setClearColor(0x06111f,1);
+  state.renderer.setClearColor(0x06111f,0);
 
   state.scene=createScene();
   state.camera=createCamera();
@@ -240,12 +240,6 @@ function drawFallback(elapsed){
   const scale=Math.min(w,h)/520;
 
   ctx.clearRect(0,0,w,h);
-  const bg=ctx.createLinearGradient(0,0,0,h);
-  bg.addColorStop(0,'#06111f');
-  bg.addColorStop(.55,'#071d31');
-  bg.addColorStop(1,'#020712');
-  ctx.fillStyle=bg;
-  ctx.fillRect(0,0,w,h);
 
   ctx.save();
   ctx.translate(cx,cy);

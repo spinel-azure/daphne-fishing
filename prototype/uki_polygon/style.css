@@ -4,17 +4,26 @@ body{overflow:hidden;background:#07111f;color:#f4fbff;font-family:system-ui,"Seg
 button{font:inherit}
 .prototypeShell{min-height:100dvh;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 50% 35%,#12345a 0,#07111f 58%,#030712 100%)}
 .viewerPanel{position:relative;width:min(920px,100%);height:min(680px,calc(100dvh - 36px));min-height:420px;overflow:hidden;border:2px solid rgba(159,211,255,.55);border-radius:8px;background:#020712;box-shadow:0 18px 42px rgba(0,0,0,.45)}
-#ukiCanvas{display:block;width:100%;height:100%;touch-action:manipulation;cursor:pointer}
-.hud{position:absolute;left:16px;top:14px;pointer-events:none;text-shadow:0 2px 0 #000,0 0 10px rgba(0,0,0,.8)}
+.gameBackdrop{position:absolute;inset:0;overflow:hidden;z-index:0;background:#020712}
+.bgBack,.bgTree,.waterScroll,.sceneShade{position:absolute;inset:0;pointer-events:none}
+.bgBack{background:url("../images/bg_back.png") center/cover no-repeat;image-rendering:pixelated;transform:scale(1.04)}
+.bgTree{background:url("../images/bg_tree.png") center/cover no-repeat;image-rendering:pixelated;transform-origin:50% 38%;animation:treeSway 5.8s ease-in-out infinite;opacity:.88}
+.waterScroll{top:34%;height:88%;background-image:url("../images/minamo.png");background-size:420px auto;background-repeat:repeat;image-rendering:pixelated;opacity:.46;mix-blend-mode:screen;animation:waterDrift 18s linear infinite}
+.sceneShade{background:linear-gradient(to bottom,rgba(1,8,18,.18),rgba(1,12,26,.28) 42%,rgba(0,4,12,.64));z-index:1}
+@keyframes treeSway{0%,100%{transform:translateX(-5px) skewX(-.45deg) scale(1.045)}50%{transform:translateX(5px) skewX(.45deg) scale(1.045)}}
+@keyframes waterDrift{from{background-position:0 0}to{background-position:-420px 190px}}
+#ukiCanvas{position:absolute;inset:0;z-index:2;display:block;width:100%;height:100%;touch-action:manipulation;cursor:pointer}
+.hud{position:absolute;left:16px;top:14px;z-index:3;pointer-events:none;text-shadow:0 2px 0 #000,0 0 10px rgba(0,0,0,.8)}
 .hud h1{margin:0 0 6px;font-size:clamp(18px,3.8vw,28px);line-height:1;letter-spacing:0}
 .hud p{margin:0;color:#ffe08a;font-size:clamp(14px,2.6vw,18px);font-weight:700}
 .loadStatus{margin-top:8px!important;color:#cce8f8!important;font-size:13px!important;font-weight:600!important;max-width:min(420px,72vw);line-height:1.45}
 .loadStatus.is-error{color:#ff8a8a!important}
-.toggleStateButton{position:absolute;right:16px;bottom:16px;min-width:128px;padding:10px 14px;border:0;border-radius:8px;color:#06111d;background:linear-gradient(#fff1a6,#e2a83a);box-shadow:0 4px 0 #8a5e18;font-weight:700}
+.toggleStateButton{position:absolute;right:16px;bottom:16px;z-index:3;min-width:128px;padding:10px 14px;border:0;border-radius:8px;color:#06111d;background:linear-gradient(#fff1a6,#e2a83a);box-shadow:0 4px 0 #8a5e18;font-weight:700}
 .toggleStateButton:active{transform:translateY(3px);box-shadow:0 1px 0 #8a5e18}
 @media(max-width:520px){
   .prototypeShell{padding:0}
   .viewerPanel{width:100%;height:100dvh;min-height:0;border:0;border-radius:0}
+  .waterScroll{background-size:320px auto}
   .hud{left:12px;top:12px}
   .toggleStateButton{right:12px;bottom:12px;min-width:112px;padding:9px 12px}
 }
