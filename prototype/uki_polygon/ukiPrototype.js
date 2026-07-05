@@ -286,6 +286,10 @@ function drawPolyPart(ctx,color,points){
 
 async function boot(){
   try{
+    if(location.protocol==='file:'){
+      initFallbackPrototype('ローカル直開きのためThree.js CDN読み込みをスキップしました。GitHub PagesではThree.js表示になります。');
+      return;
+    }
     setLoadStatus('Three.js 読み込み中...');
     THREE=await loadThree();
     initUkiPrototype();
