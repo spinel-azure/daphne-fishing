@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Low Poly Cat Prototype</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #17181a;
+    --panel: rgba(22, 23, 25, 0.72);
+    --ink: #f6f3ee;
+    --muted: #b8b6b0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.08), transparent 28%),
+      linear-gradient(145deg, #222426 0%, #141517 58%, #0d0e10 100%);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  #scene {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .hud {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    max-width: min(360px, calc(100vw - 36px));
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    background: var(--panel);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+  }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 750;
+    letter-spacing: 0;
+  }
+
+  p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .credit {
+    position: fixed;
+    right: 16px;
+    bottom: 14px;
+    color: rgba(246, 243, 238, 0.62);
+    font-size: 12px;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<aside class="hud" aria-label="Prototype notes">
+  <h1>Low Poly Cat</h1>
+  <p>OrbitControls enabled. Drag to rotate, wheel to zoom.</p>
+</aside>
+<div class="credit">flatShading / white-gray body / black face lines</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const canvas = document.getElementById("scene");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1b1d);
+scene.fog = new THREE.Fog(0x1a1b1d, 8, 18);
+
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+camera.position.set(4.2, 2.8, 7.2);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(0, 1.55, 0);
+controls.minDistance = 3.5;
+controls.maxDistance = 12;
+
+const bodyMat = new THREE.MeshStandardMaterial({
+  color: 0xf0efea,
+  roughness: 0.82,
+  metalness: 0.02,
+  flatShading: true
+});
+const shadeMat = new THREE.MeshStandardMaterial({
+  color: 0xc9c8c2,
+  roughness: 0.9,
+  flatShading: true
+});
+const blackMat = new THREE.MeshStandardMaterial({
+  color: 0x050505,
+  roughness: 0.62,
+  side: THREE.DoubleSide,
+  flatShading: true
+});
+const highlightMat = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  roughness: 0.35,
+  side: THREE.DoubleSide,
+  flatShading: true
+});
+
+const cat = new THREE.Group();
+scene.add(cat);
+
+function makeMesh(geometry, material, position, scale, rotation) {
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(position.x, position.y, position.z);
+  mesh.scale.set(scale.x, scale.y, scale.z);
+  if (rotation) mesh.rotation.set(rotation.x, rotation.y, rotation.z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  cat.add(mesh);
+  return mesh;
+}
+
+function makeTube(points, radius, material, segments = 22, radialSegments = 7) {
+  const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(p.x, p.y, p.z)));
+  const tube = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, segments, radius, radialSegments, false),
+    material
+  );
+  tube.castShadow = true;
+  tube.receiveShadow = true;
+  cat.add(tube);
+  return tube;
+}
+
+function makeTeardropBodyGeometry() {
+  const points = [
+    new THREE.Vector2(0.18, -0.84),
+    new THREE.Vector2(0.58, -0.78),
+    new THREE.Vector2(0.82, -0.42),
+    new THREE.Vector2(0.78, 0.02),
+    new THREE.Vector2(0.58, 0.48),
+    new THREE.Vector2(0.34, 0.82),
+    new THREE.Vector2(0.14, 0.94)
+  ];
+  return new THREE.LatheGeometry(points, 12);
+}
+
+const body = makeMesh(
+  makeTeardropBodyGeometry(),
+  bodyMat,
+  { x: 0, y: 0.98, z: 0 },
+  { x: 0.96, y: 1.24, z: 0.82 }
+);
+body.rotation.y = Math.PI / 8;
+
+makeMesh(
+  new THREE.SphereGeometry(0.52, 10, 7),
+  bodyMat,
+  { x: 0, y: 0.48, z: 0.08 },
+  { x: 1.14, y: 0.54, z: 0.74 },
+  { x: 0.02, y: -0.12, z: 0 }
+);
+
+makeMesh(
+  new THREE.SphereGeometry(0.34, 9, 6),
+  bodyMat,
+  { x: 0, y: 2.02, z: 0.03 },
+  { x: 0.66, y: 0.36, z: 0.6 }
+);
+
+makeMesh(
+  new THREE.SphereGeometry(0.98, 14, 9),
+  bodyMat,
+  { x: 0, y: 2.55, z: 0.04 },
+  { x: 1.02, y: 0.86, z: 0.84 }
+);
+
+makeMesh(
+  new THREE.ConeGeometry(0.42, 0.96, 3),
+  bodyMat,
+  { x: -0.66, y: 3.2, z: 0.02 },
+  { x: 0.78, y: 0.92, z: 0.68 },
+  { x: 0.02, y: 0.24, z: 0.53 }
+);
+makeMesh(
+  new THREE.ConeGeometry(0.42, 0.96, 3),
+  bodyMat,
+  { x: 0.66, y: 3.2, z: 0.02 },
+  { x: 0.78, y: 0.92, z: 0.68 },
+  { x: 0.02, y: -0.24, z: -0.53 }
+);
+makeMesh(
+  new THREE.ConeGeometry(0.24, 0.62, 3),
+  shadeMat,
+  { x: -0.66, y: 3.15, z: 0.08 },
+  { x: 0.62, y: 0.82, z: 0.48 },
+  { x: 0.02, y: 0.24, z: 0.53 }
+);
+makeMesh(
+  new THREE.ConeGeometry(0.24, 0.62, 3),
+  shadeMat,
+  { x: 0.66, y: 3.15, z: 0.08 },
+  { x: 0.62, y: 0.82, z: 0.48 },
+  { x: 0.02, y: -0.24, z: -0.53 }
+);
+
+const eyeGeo = new THREE.CircleGeometry(0.17, 12);
+const eyeHighlightGeo = new THREE.CircleGeometry(0.032, 8);
+makeMesh(
+  eyeGeo,
+  blackMat,
+  { x: -0.32, y: 2.65, z: 0.822 },
+  { x: 0.82, y: 1.02, z: 1 },
+  { x: 0.03, y: -0.1, z: 0.04 }
+);
+makeMesh(
+  eyeGeo,
+  blackMat,
+  { x: 0.32, y: 2.65, z: 0.822 },
+  { x: 0.82, y: 1.02, z: 1 },
+  { x: 0.03, y: 0.1, z: -0.04 }
+);
+makeMesh(
+  eyeHighlightGeo,
+  highlightMat,
+  { x: -0.365, y: 2.69, z: 0.827 },
+  { x: 1, y: 1, z: 1 },
+  { x: 0.03, y: -0.1, z: 0.04 }
+);
+makeMesh(
+  eyeHighlightGeo,
+  highlightMat,
+  { x: 0.275, y: 2.69, z: 0.827 },
+  { x: 1, y: 1, z: 1 },
+  { x: 0.03, y: 0.1, z: -0.04 }
+);
+
+makeTube(
+  [
+    { x: -0.3, y: 2.39, z: 0.82 },
+    { x: -0.19, y: 2.3, z: 0.827 },
+    { x: -0.04, y: 2.38, z: 0.832 },
+    { x: 0.08, y: 2.3, z: 0.827 },
+    { x: 0.25, y: 2.39, z: 0.82 }
+  ],
+  0.009,
+  blackMat,
+  20,
+  4
+);
+
+const frontLegGeo = new THREE.CylinderGeometry(0.28, 0.38, 1, 8, 1);
+const frontFootGeo = new THREE.SphereGeometry(0.27, 10, 7);
+const hindThighGeo = new THREE.SphereGeometry(0.42, 11, 7);
+const hindFootGeo = new THREE.SphereGeometry(0.34, 10, 7);
+
+function makeToeGrooves(x, y, z, width, side = 1) {
+  [-0.16, 0, 0.16].forEach((offset) => {
+    makeTube(
+      [
+        { x: x + offset * width, y: y + 0.045, z: z + 0.05 },
+        { x: x + offset * width * 1.08, y: y + 0.025, z: z + 0.2 }
+      ],
+      0.011,
+      shadeMat,
+      3,
+      4
+    ).rotation.y = side * 0.05;
+  });
+}
+
+[-1, 1].forEach((side) => {
+  const x = side * 0.22;
+  makeMesh(
+    frontLegGeo,
+    bodyMat,
+    { x, y: 0.76, z: 0.5 },
+    { x: 0.58, y: 0.88, z: 0.48 },
+    { x: -0.04, y: side * 0.08, z: side * -0.13 }
+  );
+  makeMesh(
+    frontFootGeo,
+    bodyMat,
+    { x: side * 0.3, y: 0.22, z: 0.66 },
+    { x: 1.15, y: 0.5, z: 0.78 },
+    { x: 0.02, y: side * -0.06, z: side * -0.06 }
+  );
+  makeToeGrooves(side * 0.3, 0.28, 0.65, 0.62, side);
+});
+
+[-1, 1].forEach((side) => {
+  makeMesh(
+    hindThighGeo,
+    bodyMat,
+    { x: side * 0.66, y: 0.48, z: 0.17 },
+    { x: 1.04, y: 0.9, z: 0.82 },
+    { x: 0.05, y: side * -0.2, z: side * 0.08 }
+  );
+  makeMesh(
+    hindFootGeo,
+    bodyMat,
+    { x: side * 0.68, y: 0.2, z: 0.58 },
+    { x: 1.16, y: 0.52, z: 0.82 },
+    { x: 0.04, y: side * -0.14, z: side * 0.08 }
+  );
+  makeMesh(
+    new THREE.SphereGeometry(0.24, 8, 6),
+    shadeMat,
+    { x: side * 0.76, y: 0.46, z: -0.03 },
+    { x: 0.62, y: 0.72, z: 0.56 },
+    { x: -0.08, y: side * -0.28, z: side * 0.12 }
+  );
+  makeToeGrooves(side * 0.68, 0.28, 0.58, 0.72, side);
+});
+
+makeTube(
+  [
+    { x: 0.66, y: 0.86, z: -0.22 },
+    { x: 1.35, y: 0.82, z: -0.16 },
+    { x: 1.95, y: 1.34, z: -0.06 },
+    { x: 1.86, y: 2.08, z: 0.04 },
+    { x: 1.55, y: 2.4, z: 0.1 }
+  ],
+  0.15,
+  bodyMat,
+  18,
+  8
+);
+
+makeTube(
+  [
+    { x: -0.73, y: 2.78, z: 0.08 },
+    { x: -1.02, y: 2.7, z: 0.04 },
+    { x: -0.9, y: 2.42, z: 0.02 }
+  ],
+  0.025,
+  shadeMat,
+  12,
+  5
+);
+makeTube(
+  [
+    { x: 0.73, y: 2.78, z: 0.08 },
+    { x: 1.02, y: 2.7, z: 0.04 },
+    { x: 0.9, y: 2.42, z: 0.02 }
+  ],
+  0.025,
+  shadeMat,
+  12,
+  5
+);
+
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(3.2, 36),
+  new THREE.MeshStandardMaterial({ color: 0x2a2a2b, roughness: 0.95, flatShading: true })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.02;
+ground.receiveShadow = true;
+scene.add(ground);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x3a3a42, 2.4));
+const key = new THREE.DirectionalLight(0xffffff, 2.6);
+key.position.set(-3.2, 5.4, 4.6);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xd8e2ff, 1.2);
+rim.position.set(3.8, 2.4, -3);
+scene.add(rim);
+
+function resize() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  renderer.setSize(width, height, false);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+}
+
+function animate() {
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+window.addEventListener("resize", resize);
+resize();
+animate();
+</script>
+</body>
+</html>
