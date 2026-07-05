@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Low Poly Cat Prototype</title>
+<title>MIKA-Nyan Low Poly Cat Prototype</title>
 <style>
   :root {
     color-scheme: dark;
@@ -77,10 +77,10 @@
 <body>
 <canvas id="scene"></canvas>
 <aside class="hud" aria-label="Prototype notes">
-  <h1>Low Poly Cat</h1>
+  <h1>MIKA-Nyan Low Poly Cat</h1>
   <p>OrbitControls enabled. Drag to rotate, wheel to zoom.</p>
 </aside>
-<div class="credit">flatShading / white-gray body / black face lines</div>
+<div class="credit">flatShading / pale-orange body / black face lines</div>
 
 <script type="importmap">
 {
@@ -114,13 +114,14 @@ controls.minDistance = 3.5;
 controls.maxDistance = 12;
 
 const bodyMat = new THREE.MeshStandardMaterial({
-  color: 0xf0efea,
+  color: 0xffffff,
+  map: createFurTexture(),
   roughness: 0.82,
   metalness: 0.02,
   flatShading: true
 });
 const shadeMat = new THREE.MeshStandardMaterial({
-  color: 0xc9c8c2,
+  color: 0xd9c3a8,
   roughness: 0.9,
   flatShading: true
 });
@@ -137,21 +138,30 @@ const highlightMat = new THREE.MeshStandardMaterial({
   flatShading: true
 });
 
+const headMat = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  map: createFaceTexture(),
+  roughness: 0.82,
+  metalness: 0.02,
+  flatShading: true
+});
+
 const cat = new THREE.Group();
 scene.add(cat);
+const clock = new THREE.Clock();
 
-function makeMesh(geometry, material, position, scale, rotation) {
+function makeMesh(geometry, material, position, scale, rotation, parent = cat) {
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(position.x, position.y, position.z);
   mesh.scale.set(scale.x, scale.y, scale.z);
   if (rotation) mesh.rotation.set(rotation.x, rotation.y, rotation.z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  cat.add(mesh);
+  parent.add(mesh);
   return mesh;
 }
 
-function makeTube(points, radius, material, segments = 22, radialSegments = 7) {
+function makeTube(points, radius, material, segments = 22, radialSegments = 7, parent = cat) {
   const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(p.x, p.y, p.z)));
   const tube = new THREE.Mesh(
     new THREE.TubeGeometry(curve, segments, radius, radialSegments, false),
@@ -159,130 +169,207 @@ function makeTube(points, radius, material, segments = 22, radialSegments = 7) {
   );
   tube.castShadow = true;
   tube.receiveShadow = true;
-  cat.add(tube);
+  parent.add(tube);
   return tube;
+}
+
+function createFurTexture() {
+  const furCanvas = document.createElement("canvas");
+  furCanvas.width = 1024;
+  furCanvas.height = 1024;
+  const ctx = furCanvas.getContext("2d");
+  ctx.fillStyle = "#fff0dc";
+  ctx.fillRect(0, 0, furCanvas.width, furCanvas.height);
+  drawLowPolyPatch(ctx, "#8a4f2d", [
+    [52, 80], [324, 42], [455, 215], [352, 390], [94, 330]
+  ]);
+  drawLowPolyPatch(ctx, "#e7a63a", [
+    [620, 64], [928, 135], [884, 368], [658, 438], [535, 238]
+  ]);
+  drawLowPolyPatch(ctx, "#8a4f2d", [
+    [86, 610], [344, 545], [410, 832], [175, 940], [40, 790]
+  ]);
+  drawLowPolyPatch(ctx, "#e7a63a", [
+    [610, 620], [940, 570], [1000, 820], [770, 982], [560, 820]
+  ]);
+  return makeCanvasTexture(furCanvas);
+}
+
+function drawLowPolyPatch(ctx, color, points) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  points.forEach(([x, y], index) => {
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.fill();
+}
+
+function makeCanvasTexture(canvas) {
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  return texture;
+}
+
+function createFaceTexture() {
+  const faceCanvas = document.createElement("canvas");
+  faceCanvas.width = 1024;
+  faceCanvas.height = 1024;
+  const ctx = faceCanvas.getContext("2d");
+  ctx.fillStyle = "#fff0dc";
+  ctx.fillRect(0, 0, faceCanvas.width, faceCanvas.height);
+
+  drawLowPolyPatch(ctx, "#8a4f2d", [
+    [30, 95], [210, 35], [315, 168], [238, 310], [52, 285]
+  ]);
+  drawLowPolyPatch(ctx, "#e7a63a", [
+    [350, 62], [520, 102], [500, 286], [382, 330], [308, 180]
+  ]);
+
+  const faceX = 256;
+  ctx.fillStyle = "#050505";
+  ctx.beginPath();
+  ctx.ellipse(faceX - 90, 486, 42, 62, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(faceX + 90, 486, 42, 62, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.ellipse(faceX - 104, 456, 8, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(faceX + 76, 456, 8, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#050505";
+  ctx.beginPath();
+  ctx.moveTo(faceX, 560);
+  ctx.lineTo(faceX - 11, 576);
+  ctx.lineTo(faceX + 11, 576);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = "#050505";
+  ctx.lineWidth = 9;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(faceX, 576);
+  ctx.bezierCurveTo(faceX - 10, 628, faceX - 62, 616, faceX - 46, 568);
+  ctx.moveTo(faceX, 576);
+  ctx.bezierCurveTo(faceX + 10, 628, faceX + 62, 616, faceX + 46, 568);
+  ctx.stroke();
+
+  return makeCanvasTexture(faceCanvas);
 }
 
 function makeTeardropBodyGeometry() {
   const points = [
-    new THREE.Vector2(0.18, -0.84),
-    new THREE.Vector2(0.58, -0.78),
-    new THREE.Vector2(0.82, -0.42),
-    new THREE.Vector2(0.78, 0.02),
-    new THREE.Vector2(0.58, 0.48),
-    new THREE.Vector2(0.34, 0.82),
-    new THREE.Vector2(0.14, 0.94)
+    new THREE.Vector2(0.14, -0.98),
+    new THREE.Vector2(0.52, -0.9),
+    new THREE.Vector2(0.7, -0.5),
+    new THREE.Vector2(0.62, 0.1),
+    new THREE.Vector2(0.42, 0.62),
+    new THREE.Vector2(0.25, 0.98),
+    new THREE.Vector2(0.1, 1.08)
   ];
   return new THREE.LatheGeometry(points, 12);
+}
+
+function makeRoundedEarGeometry(side) {
+  const shape = new THREE.Shape();
+  shape.moveTo(side * -0.28, -0.2);
+  shape.quadraticCurveTo(side * -0.42, 0.06, side * -0.2, 0.38);
+  shape.quadraticCurveTo(side * -0.08, 0.5, side * 0.05, 0.42);
+  shape.quadraticCurveTo(side * 0.28, 0.08, side * 0.28, -0.2);
+  shape.lineTo(side * -0.28, -0.2);
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.22,
+    bevelEnabled: false,
+    curveSegments: 3,
+    steps: 1
+  });
+  geometry.translate(0, 0, -0.11);
+  return geometry;
 }
 
 const body = makeMesh(
   makeTeardropBodyGeometry(),
   bodyMat,
-  { x: 0, y: 0.98, z: 0 },
-  { x: 0.96, y: 1.24, z: 0.82 }
+  { x: 0, y: 1.08, z: 0 },
+  { x: 0.9, y: 1.44, z: 0.76 }
 );
 body.rotation.y = Math.PI / 8;
 
 makeMesh(
   new THREE.SphereGeometry(0.52, 10, 7),
   bodyMat,
-  { x: 0, y: 0.48, z: 0.08 },
-  { x: 1.14, y: 0.54, z: 0.74 },
+  { x: 0, y: 0.43, z: 0.08 },
+  { x: 0.94, y: 0.5, z: 0.66 },
   { x: 0.02, y: -0.12, z: 0 }
 );
 
 makeMesh(
   new THREE.SphereGeometry(0.34, 9, 6),
   bodyMat,
-  { x: 0, y: 2.02, z: 0.03 },
-  { x: 0.66, y: 0.36, z: 0.6 }
+  { x: 0, y: 2.28, z: 0.03 },
+  { x: 0.58, y: 0.28, z: 0.54 }
 );
 
 makeMesh(
   new THREE.SphereGeometry(0.98, 14, 9),
-  bodyMat,
-  { x: 0, y: 2.55, z: 0.04 },
-  { x: 1.02, y: 0.86, z: 0.84 }
+  headMat,
+  { x: 0, y: 2.72, z: 0.04 },
+  { x: 1.02, y: 0.82, z: 0.82 }
 );
 
+const leftEarGroup = new THREE.Group();
+leftEarGroup.position.set(-0.67, 2.96, 0.03);
+cat.add(leftEarGroup);
+const rightEarGroup = new THREE.Group();
+rightEarGroup.position.set(0.67, 2.96, 0.03);
+cat.add(rightEarGroup);
+
 makeMesh(
-  new THREE.ConeGeometry(0.42, 0.96, 3),
+  makeRoundedEarGeometry(-1),
   bodyMat,
-  { x: -0.66, y: 3.2, z: 0.02 },
-  { x: 0.78, y: 0.92, z: 0.68 },
-  { x: 0.02, y: 0.24, z: 0.53 }
+  { x: 0, y: 0.26, z: 0 },
+  { x: 1.26, y: 1.3, z: 1.32 },
+  { x: 0.04, y: 0.08, z: 0.08 },
+  leftEarGroup
 );
 makeMesh(
-  new THREE.ConeGeometry(0.42, 0.96, 3),
+  makeRoundedEarGeometry(1),
   bodyMat,
-  { x: 0.66, y: 3.2, z: 0.02 },
-  { x: 0.78, y: 0.92, z: 0.68 },
-  { x: 0.02, y: -0.24, z: -0.53 }
+  { x: 0, y: 0.26, z: 0 },
+  { x: 1.26, y: 1.3, z: 1.32 },
+  { x: 0.04, y: -0.08, z: -0.08 },
+  rightEarGroup
 );
 makeMesh(
-  new THREE.ConeGeometry(0.24, 0.62, 3),
+  makeRoundedEarGeometry(-1),
   shadeMat,
-  { x: -0.66, y: 3.15, z: 0.08 },
-  { x: 0.62, y: 0.82, z: 0.48 },
-  { x: 0.02, y: 0.24, z: 0.53 }
+  { x: 0, y: 0.24, z: 0.07 },
+  { x: 0.66, y: 0.78, z: 0.76 },
+  { x: 0.04, y: 0.08, z: 0.08 },
+  leftEarGroup
 );
 makeMesh(
-  new THREE.ConeGeometry(0.24, 0.62, 3),
+  makeRoundedEarGeometry(1),
   shadeMat,
-  { x: 0.66, y: 3.15, z: 0.08 },
-  { x: 0.62, y: 0.82, z: 0.48 },
-  { x: 0.02, y: -0.24, z: -0.53 }
-);
-
-const eyeGeo = new THREE.CircleGeometry(0.17, 12);
-const eyeHighlightGeo = new THREE.CircleGeometry(0.032, 8);
-makeMesh(
-  eyeGeo,
-  blackMat,
-  { x: -0.32, y: 2.65, z: 0.822 },
-  { x: 0.82, y: 1.02, z: 1 },
-  { x: 0.03, y: -0.1, z: 0.04 }
-);
-makeMesh(
-  eyeGeo,
-  blackMat,
-  { x: 0.32, y: 2.65, z: 0.822 },
-  { x: 0.82, y: 1.02, z: 1 },
-  { x: 0.03, y: 0.1, z: -0.04 }
-);
-makeMesh(
-  eyeHighlightGeo,
-  highlightMat,
-  { x: -0.365, y: 2.69, z: 0.827 },
-  { x: 1, y: 1, z: 1 },
-  { x: 0.03, y: -0.1, z: 0.04 }
-);
-makeMesh(
-  eyeHighlightGeo,
-  highlightMat,
-  { x: 0.275, y: 2.69, z: 0.827 },
-  { x: 1, y: 1, z: 1 },
-  { x: 0.03, y: 0.1, z: -0.04 }
-);
-
-makeTube(
-  [
-    { x: -0.3, y: 2.39, z: 0.82 },
-    { x: -0.19, y: 2.3, z: 0.827 },
-    { x: -0.04, y: 2.38, z: 0.832 },
-    { x: 0.08, y: 2.3, z: 0.827 },
-    { x: 0.25, y: 2.39, z: 0.82 }
-  ],
-  0.009,
-  blackMat,
-  20,
-  4
+  { x: 0, y: 0.24, z: 0.07 },
+  { x: 0.66, y: 0.78, z: 0.76 },
+  { x: 0.04, y: -0.08, z: -0.08 },
+  rightEarGroup
 );
 
 const frontLegGeo = new THREE.CylinderGeometry(0.28, 0.38, 1, 8, 1);
 const frontFootGeo = new THREE.SphereGeometry(0.27, 10, 7);
-const hindThighGeo = new THREE.SphereGeometry(0.42, 11, 7);
+const hindThighGeo = new THREE.SphereGeometry(0.44, 11, 7);
 const hindFootGeo = new THREE.SphereGeometry(0.34, 10, 7);
 
 function makeToeGrooves(x, y, z, width, side = 1) {
@@ -301,84 +388,74 @@ function makeToeGrooves(x, y, z, width, side = 1) {
 }
 
 [-1, 1].forEach((side) => {
-  const x = side * 0.22;
+  const x = side * 0.24;
   makeMesh(
     frontLegGeo,
     bodyMat,
-    { x, y: 0.76, z: 0.5 },
-    { x: 0.58, y: 0.88, z: 0.48 },
-    { x: -0.04, y: side * 0.08, z: side * -0.13 }
+    { x, y: 0.84, z: 0.5 },
+    { x: 0.5, y: 1.2, z: 0.43 },
+    { x: -0.03, y: side * 0.08, z: side * -0.2 }
   );
   makeMesh(
     frontFootGeo,
     bodyMat,
-    { x: side * 0.3, y: 0.22, z: 0.66 },
-    { x: 1.15, y: 0.5, z: 0.78 },
-    { x: 0.02, y: side * -0.06, z: side * -0.06 }
+    { x: side * 0.36, y: 0.14, z: 0.66 },
+    { x: 1.08, y: 0.48, z: 0.74 },
+    { x: 0.02, y: side * -0.08, z: side * -0.08 }
   );
-  makeToeGrooves(side * 0.3, 0.28, 0.65, 0.62, side);
+  makeToeGrooves(side * 0.36, 0.2, 0.65, 0.58, side);
 });
 
 [-1, 1].forEach((side) => {
   makeMesh(
     hindThighGeo,
     bodyMat,
-    { x: side * 0.66, y: 0.48, z: 0.17 },
-    { x: 1.04, y: 0.9, z: 0.82 },
-    { x: 0.05, y: side * -0.2, z: side * 0.08 }
+    { x: side * 0.55, y: 0.45, z: 0.14 },
+    { x: 0.98, y: 0.96, z: 0.82 },
+    { x: 0.04, y: side * -0.12, z: side * 0.06 }
   );
   makeMesh(
     hindFootGeo,
     bodyMat,
-    { x: side * 0.68, y: 0.2, z: 0.58 },
-    { x: 1.16, y: 0.52, z: 0.82 },
-    { x: 0.04, y: side * -0.14, z: side * 0.08 }
+    { x: side * 0.56, y: 0.16, z: 0.58 },
+    { x: 1.02, y: 0.52, z: 0.78 },
+    { x: 0.04, y: side * -0.1, z: side * 0.06 }
   );
   makeMesh(
     new THREE.SphereGeometry(0.24, 8, 6),
     shadeMat,
-    { x: side * 0.76, y: 0.46, z: -0.03 },
-    { x: 0.62, y: 0.72, z: 0.56 },
-    { x: -0.08, y: side * -0.28, z: side * 0.12 }
+    { x: side * 0.62, y: 0.44, z: -0.02 },
+    { x: 0.54, y: 0.72, z: 0.54 },
+    { x: -0.08, y: side * -0.18, z: side * 0.1 }
   );
-  makeToeGrooves(side * 0.68, 0.28, 0.58, 0.72, side);
+  makeToeGrooves(side * 0.56, 0.24, 0.58, 0.62, side);
 });
+
+const tailGroup = new THREE.Group();
+tailGroup.position.set(0.58, 0.8, -0.18);
+cat.add(tailGroup);
 
 makeTube(
   [
-    { x: 0.66, y: 0.86, z: -0.22 },
-    { x: 1.35, y: 0.82, z: -0.16 },
-    { x: 1.95, y: 1.34, z: -0.06 },
-    { x: 1.86, y: 2.08, z: 0.04 },
-    { x: 1.55, y: 2.4, z: 0.1 }
+    { x: 0, y: 0, z: 0 },
+    { x: 0.64, y: -0.04, z: 0.06 },
+    { x: 1.24, y: 0.46, z: 0.14 },
+    { x: 1.16, y: 1.18, z: 0.22 },
+    { x: 0.9, y: 1.48, z: 0.28 }
   ],
   0.15,
   bodyMat,
   18,
-  8
+  8,
+  tailGroup
 );
-
-makeTube(
-  [
-    { x: -0.73, y: 2.78, z: 0.08 },
-    { x: -1.02, y: 2.7, z: 0.04 },
-    { x: -0.9, y: 2.42, z: 0.02 }
-  ],
-  0.025,
-  shadeMat,
-  12,
-  5
-);
-makeTube(
-  [
-    { x: 0.73, y: 2.78, z: 0.08 },
-    { x: 1.02, y: 2.7, z: 0.04 },
-    { x: 0.9, y: 2.42, z: 0.02 }
-  ],
-  0.025,
-  shadeMat,
-  12,
-  5
+makeMesh(
+  new THREE.SphereGeometry(0.2, 10, 7),
+  bodyMat,
+  { x: 0.9, y: 1.48, z: 0.28 },
+  { x: 1, y: 1.04, z: 1 },
+  null,
+  tailGroup
 );
 
 const ground = new THREE.Mesh(
@@ -409,6 +486,15 @@ function resize() {
 }
 
 function animate() {
+  const elapsed = clock.getElapsedTime();
+  const earFlick = Math.sin(elapsed * 5.2) * 0.08;
+  leftEarGroup.rotation.z = -0.03 + earFlick;
+  rightEarGroup.rotation.z = 0.03 - Math.sin(elapsed * 5.2 + 0.6) * 0.08;
+  leftEarGroup.rotation.x = Math.sin(elapsed * 4.4 + 0.4) * 0.025;
+  rightEarGroup.rotation.x = Math.sin(elapsed * 4.4 + 1.0) * 0.025;
+
+  tailGroup.rotation.y = Math.sin(elapsed * 2.7) * 0.24;
+  tailGroup.rotation.z = Math.sin(elapsed * 2.7 + 0.8) * 0.08;
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
