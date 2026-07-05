@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Daphne Fishing Uki Polygon Prototype</title>
-<link rel="stylesheet" href="style.css?v=20260705-game-size1">
+<link rel="stylesheet" href="style.css?v=20260705-size-slider1">
 </head>
 <body>
 <main class="prototypeShell">
@@ -21,9 +21,13 @@
       <p id="stateLabel">通常状態</p>
       <p id="loadStatus" class="loadStatus">Three.js 読み込み中...</p>
     </div>
+    <label class="scaleControl">
+      <span>ウキサイズ <strong id="scaleValue">55%</strong></span>
+      <input id="ukiScaleSlider" type="range" min="35" max="120" step="1" value="55">
+    </label>
     <button id="toggleStateButton" class="toggleStateButton" type="button">アタリ切替</button>
   </section>
 </main>
-<script type="module" src="ukiPrototype.js?v=20260705-game-size1"></script>
+<script type="module" src="ukiPrototype.js?v=20260705-size-slider1"></script>
 </body>
 </html>

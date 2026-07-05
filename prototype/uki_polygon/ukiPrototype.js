@@ -15,6 +15,7 @@ const state={
   baseY:0,
   targetSink:0,
   currentSink:0,
+  ukiScale:.55,
   fallbackCtx:null,
   fallbackStart:0
 };
@@ -65,9 +66,11 @@ function initUkiPrototype(){
   window.addEventListener('resize',resize);
   state.canvas.addEventListener('click',toggleBiteState);
   document.getElementById('toggleStateButton')?.addEventListener('click',toggleBiteState);
+  initScaleControl();
 
   resize();
   setBiteState(false);
+  applyUkiScale();
   setLoadStatus('クリック/タップで通常状態とアタリ状態を切り替え');
   requestAnimationFrame(animate);
 }
@@ -80,6 +83,7 @@ function initFallbackPrototype(reason){
   window.addEventListener('resize',resizeFallback);
   state.canvas.addEventListener('click',toggleBiteState);
   document.getElementById('toggleStateButton')?.addEventListener('click',toggleBiteState);
+  initScaleControl();
   resizeFallback();
   setBiteState(false);
   setLoadStatus(`Three.js を読み込めないため2D代替表示中。file://直開きではCDN読み込みが止まる場合があります。${reason}`,true);
@@ -173,6 +177,24 @@ function setBiteState(isBite){
   if(label)label.textContent=state.isBite?'アタリ状態':'通常状態';
 }
 
+function initScaleControl(){
+  const slider=document.getElementById('ukiScaleSlider');
+  if(!slider)return;
+  const sync=()=>{
+    state.ukiScale=Number(slider.value)/100;
+    const value=document.getElementById('scaleValue');
+    if(value)value.textContent=`${slider.value}%`;
+    applyUkiScale();
+  };
+  slider.value=String(Math.round(state.ukiScale*100));
+  slider.addEventListener('input',sync);
+  sync();
+}
+
+function applyUkiScale(){
+  if(state.uki)state.uki.scale.setScalar(state.ukiScale);
+}
+
 function toggleBiteState(){
   setBiteState(!state.isBite);
 }
@@ -237,7 +259,7 @@ function drawFallback(elapsed){
   const shake=state.isBite?Math.sin(elapsed*18)*3*dpr:0;
   const cx=w*.52;
   const cy=h*.48-state.currentSink*42*dpr+Math.sin(elapsed*(state.isBite?7.4:2.2))*bobAmp+shake;
-  const scale=Math.min(w,h)/520;
+  const scale=Math.min(w,h)/520*state.ukiScale/.55;
 
   ctx.clearRect(0,0,w,h);
 
