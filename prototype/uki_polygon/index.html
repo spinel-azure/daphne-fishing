@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Daphne Fishing Uki Polygon Prototype</title>
-<link rel="stylesheet" href="style.css?v=20260705-size-slider1">
+<link rel="stylesheet" href="style.css?v=20260705-scale-presets1">
 </head>
 <body>
 <main class="prototypeShell">
@@ -25,9 +25,15 @@
       <span>ウキサイズ <strong id="scaleValue">55%</strong></span>
       <input id="ukiScaleSlider" type="range" min="35" max="120" step="1" value="55">
     </label>
+    <div class="scalePresetBar" aria-label="ウキサイズプリセット">
+      <button type="button" data-scale-preset="35">MIN</button>
+      <button type="button" data-scale-preset="50">50%</button>
+      <button type="button" data-scale-preset="100">100%</button>
+      <button type="button" data-scale-preset="120">MAX</button>
+    </div>
     <button id="toggleStateButton" class="toggleStateButton" type="button">アタリ切替</button>
   </section>
 </main>
-<script type="module" src="ukiPrototype.js?v=20260705-size-slider1"></script>
+<script type="module" src="ukiPrototype.js?v=20260705-scale-presets1"></script>
 </body>
 </html>

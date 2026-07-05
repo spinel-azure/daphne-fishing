@@ -180,19 +180,48 @@ function setBiteState(isBite){
 function initScaleControl(){
   const slider=document.getElementById('ukiScaleSlider');
   if(!slider)return;
-  const sync=()=>{
-    state.ukiScale=Number(slider.value)/100;
-    const value=document.getElementById('scaleValue');
-    if(value)value.textContent=`${slider.value}%`;
-    applyUkiScale();
-  };
   slider.value=String(Math.round(state.ukiScale*100));
-  slider.addEventListener('input',sync);
-  sync();
+  slider.addEventListener('input',syncScaleControl);
+  document.querySelectorAll('[data-scale-preset]').forEach((button)=>{
+    button.addEventListener('click',(event)=>{
+      event.stopPropagation();
+      setUkiScalePercent(Number(button.dataset.scalePreset));
+    });
+  });
+  syncScaleControl();
+}
+
+function setUkiScalePercent(percent){
+  const slider=document.getElementById('ukiScaleSlider');
+  if(!slider)return;
+  const min=Number(slider.min)||35;
+  const max=Number(slider.max)||120;
+  const next=Math.max(min,Math.min(max,Math.round(percent)));
+  slider.value=String(next);
+  syncScaleControl();
+}
+
+function syncScaleControl(){
+  const slider=document.getElementById('ukiScaleSlider');
+  if(!slider)return;
+  const percent=Number(slider.value);
+  state.ukiScale=percent/100;
+  const value=document.getElementById('scaleValue');
+  if(value)value.textContent=`${percent}%`;
+  document.querySelectorAll('[data-scale-preset]').forEach((button)=>{
+    button.classList.toggle('is-active',Number(button.dataset.scalePreset)===percent);
+  });
+  applyUkiScale();
 }
 
 function applyUkiScale(){
-  if(state.uki)state.uki.scale.setScalar(state.ukiScale);
+  if(state.uki)state.uki.scale.set(state.ukiScale*getMobileWidthBoost(),state.ukiScale,state.ukiScale);
+}
+
+function getMobileWidthBoost(){
+  const rect=state.canvas?.getBoundingClientRect();
+  const width=rect?.width||520;
+  return width<430 ? 1.28 : 1;
 }
 
 function toggleBiteState(){
@@ -207,6 +236,7 @@ function resize(){
   state.renderer.setSize(width,height,false);
   state.camera.aspect=width/height;
   state.camera.updateProjectionMatrix();
+  applyUkiScale();
 }
 
 function resizeFallback(){
@@ -260,13 +290,14 @@ function drawFallback(elapsed){
   const cx=w*.52;
   const cy=h*.48-state.currentSink*42*dpr+Math.sin(elapsed*(state.isBite?7.4:2.2))*bobAmp+shake;
   const scale=Math.min(w,h)/520*state.ukiScale/.55;
+  const widthBoost=getMobileWidthBoost();
 
   ctx.clearRect(0,0,w,h);
 
   ctx.save();
   ctx.translate(cx,cy);
   ctx.rotate(-.12+Math.sin(elapsed*1.8)*.04);
-  ctx.scale(scale,scale);
+  ctx.scale(scale*widthBoost,scale);
   ctx.shadowColor='rgba(0,0,0,.65)';
   ctx.shadowBlur=18;
   ctx.shadowOffsetY=8;

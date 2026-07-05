@@ -20,6 +20,10 @@ button{font:inherit}
 .loadStatus.is-error{color:#ff8a8a!important}
 .scaleControl{position:absolute;left:16px;right:16px;bottom:82px;z-index:3;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:8px 10px;border:2px solid rgba(159,211,255,.65);border-radius:8px;background:rgba(1,8,18,.72);color:#f4fbff;text-shadow:1px 1px 0 #000;font-weight:700}
 .scaleControl span{white-space:nowrap}.scaleControl strong{color:#ffe08a}.scaleControl input{width:100%;accent-color:#ffe08a}
+.scalePresetBar{position:absolute;left:16px;right:160px;bottom:16px;z-index:3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.scalePresetBar button{height:42px;padding:0;border:2px solid rgba(159,211,255,.7);border-radius:8px;background:rgba(1,8,18,.78);color:#f4fbff;box-shadow:0 4px 0 rgba(0,0,0,.45);font-size:13px;font-weight:700;text-shadow:1px 1px 0 #000}
+.scalePresetBar button.is-active{border-color:#ffe08a;background:linear-gradient(#fff1a6,#e2a83a);color:#06111d;text-shadow:none}
+.scalePresetBar button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.45)}
 .toggleStateButton{position:absolute;right:16px;bottom:16px;z-index:3;min-width:128px;padding:10px 14px;border:0;border-radius:8px;color:#06111d;background:linear-gradient(#fff1a6,#e2a83a);box-shadow:0 4px 0 #8a5e18;font-weight:700}
 .toggleStateButton:active{transform:translateY(3px);box-shadow:0 1px 0 #8a5e18}
 @media(max-width:520px){
@@ -28,5 +32,7 @@ button{font:inherit}
   .waterScroll{background-size:520px 100%}
   .hud{left:12px;top:12px}
   .scaleControl{left:12px;right:12px;bottom:70px;grid-template-columns:1fr;font-size:13px;gap:5px}
+  .scalePresetBar{left:12px;right:136px;bottom:12px;gap:4px}
+  .scalePresetBar button{height:42px;font-size:12px}
   .toggleStateButton{right:12px;bottom:12px;min-width:112px;padding:9px 12px}
 }
