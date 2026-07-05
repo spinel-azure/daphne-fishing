@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Daphne Fishing Snow Canvas Prototype</title>
+<link rel="stylesheet" href="style.css?v=20260705-snow-canvas1">
+</head>
+<body>
+<main class="prototypeShell">
+  <section class="viewerPanel" aria-label="Snow canvas prototype">
+    <div class="gameBackdrop" aria-hidden="true">
+      <div class="bgBack"></div>
+      <div class="bgTree"></div>
+      <div class="waterScroll"></div>
+      <div class="sceneShade"></div>
+    </div>
+    <canvas id="snowCanvas"></canvas>
+    <div class="hud">
+      <h1>Snow Canvas Prototype</h1>
+      <p>小雪演出検証</p>
+    </div>
+    <div class="controlPanel" aria-label="小雪設定">
+      <section class="snowControl" aria-label="舞う速度">
+        <label>
+          <span>舞う速度 <strong id="speedValue">100%</strong></span>
+          <input id="speedSlider" type="range" min="0" max="200" step="1" value="100">
+        </label>
+        <div class="presetBar" aria-label="舞う速度プリセット">
+          <button type="button" data-control="speed" data-preset="0">MIN</button>
+          <button type="button" data-control="speed" data-preset="50">50%</button>
+          <button type="button" data-control="speed" data-preset="100">100%</button>
+          <button type="button" data-control="speed" data-preset="200">MAX</button>
+        </div>
+      </section>
+      <section class="snowControl" aria-label="舞う量">
+        <label>
+          <span>舞う量 <strong id="amountValue">100%</strong></span>
+          <input id="amountSlider" type="range" min="0" max="200" step="1" value="100">
+        </label>
+        <div class="presetBar" aria-label="舞う量プリセット">
+          <button type="button" data-control="amount" data-preset="0">MIN</button>
+          <button type="button" data-control="amount" data-preset="50">50%</button>
+          <button type="button" data-control="amount" data-preset="100">100%</button>
+          <button type="button" data-control="amount" data-preset="200">MAX</button>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+<script type="module" src="snowPrototype.js?v=20260705-snow-canvas1"></script>
+</body>
+</html>

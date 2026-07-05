@@ -1,0 +1,37 @@
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0}
+body{overflow:hidden;background:#07111f;color:#f4fbff;font-family:system-ui,"Segoe UI",sans-serif}
+button{font:inherit}
+.prototypeShell{min-height:100dvh;display:grid;place-items:center;padding:0;background:#050914}
+.viewerPanel{position:relative;width:min(520px,100vw);height:100dvh;min-height:0;overflow:hidden;border-left:1px solid #111;border-right:1px solid #111;background:#020712;box-shadow:0 18px 42px rgba(0,0,0,.45)}
+.gameBackdrop{position:absolute;inset:0;overflow:hidden;z-index:0;background:#020712}
+.bgBack,.bgTree,.waterScroll,.sceneShade{position:absolute;inset:0;pointer-events:none}
+.bgBack{background:url("../images/bg_back.png") center/cover no-repeat;image-rendering:pixelated}
+.bgTree{background:url("../images/bg_tree.png") center/cover no-repeat;image-rendering:pixelated;transform-origin:50% 38%;animation:treeSway 5.8s ease-in-out infinite;opacity:.88}
+.waterScroll{top:34%;height:88%;background-image:url("../images/minamo.png");background-size:520px 100%;background-repeat:repeat-x;image-rendering:pixelated;opacity:.46;mix-blend-mode:screen;animation:waterDrift 65s linear infinite}
+.sceneShade{z-index:1;background:linear-gradient(to bottom,rgba(1,8,18,.12),rgba(1,12,26,.24) 42%,rgba(0,4,12,.58))}
+@keyframes treeSway{0%,100%{transform:translateX(-3px) skewX(-.28deg)}50%{transform:translateX(3px) skewX(.28deg)}}
+@keyframes waterDrift{from{background-position:0 0}to{background-position:-520px 0}}
+#snowCanvas{position:absolute;inset:0;z-index:2;display:block;width:100%;height:100%;pointer-events:none}
+.hud{position:absolute;left:16px;top:14px;z-index:3;pointer-events:none;text-shadow:0 2px 0 #000,0 0 10px rgba(0,0,0,.8)}
+.hud h1{margin:0 0 6px;font-size:clamp(18px,3.8vw,28px);line-height:1;letter-spacing:0}
+.hud p{margin:0;color:#ffe08a;font-size:clamp(14px,2.6vw,18px);font-weight:700}
+.controlPanel{position:absolute;left:16px;right:16px;bottom:16px;z-index:4;display:grid;gap:10px}
+.snowControl{display:grid;gap:8px;padding:10px;border:2px solid rgba(159,211,255,.65);border-radius:8px;background:rgba(1,8,18,.74);color:#f4fbff;text-shadow:1px 1px 0 #000;font-weight:700}
+.snowControl label{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center}
+.snowControl span{white-space:nowrap}.snowControl strong{color:#ffe08a}.snowControl input{width:100%;accent-color:#ffe08a}
+.presetBar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.presetBar button{height:38px;padding:0;border:2px solid rgba(159,211,255,.7);border-radius:8px;background:rgba(1,8,18,.78);color:#f4fbff;box-shadow:0 4px 0 rgba(0,0,0,.45);font-size:13px;font-weight:700;text-shadow:1px 1px 0 #000}
+.presetBar button.is-active{border-color:#ffe08a;background:linear-gradient(#fff1a6,#e2a83a);color:#06111d;text-shadow:none}
+.presetBar button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.45)}
+@media(max-width:520px){
+  .prototypeShell{padding:0}
+  .viewerPanel{width:100%;height:100dvh;min-height:0;border:0;border-radius:0}
+  .waterScroll{background-size:520px 100%}
+  .hud{left:12px;top:12px}
+  .controlPanel{left:12px;right:12px;bottom:12px;gap:8px}
+  .snowControl{padding:9px;gap:7px}
+  .snowControl label{grid-template-columns:1fr;font-size:13px;gap:5px}
+  .presetBar{gap:4px}
+  .presetBar button{height:38px;font-size:12px}
+}
