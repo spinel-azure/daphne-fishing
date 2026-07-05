@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Daphne Fishing Uki Polygon Prototype</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="prototypeShell">
+  <section class="viewerPanel" aria-label="Uki polygon prototype">
+    <canvas id="ukiCanvas"></canvas>
+    <div class="hud">
+      <h1>Uki Polygon Prototype</h1>
+      <p id="stateLabel">通常状態</p>
+      <p id="loadStatus" class="loadStatus">Three.js 読み込み中...</p>
+    </div>
+    <button id="toggleStateButton" class="toggleStateButton" type="button">アタリ切替</button>
+  </section>
+</main>
+<script type="module" src="ukiPrototype.js"></script>
+</body>
+</html>
