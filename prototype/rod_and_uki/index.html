@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Daphne Fishing Rod and Uki Prototype</title>
-<link rel="stylesheet" href="style.css?v=20260706-rod-uki1">
+<link rel="stylesheet" href="style.css?v=20260706-rod-three1">
 </head>
 <body>
 <main class="prototypeShell">
@@ -16,8 +16,8 @@
       <div class="sceneShade"></div>
     </div>
 
+    <canvas id="rodCanvas" class="rodCanvas"></canvas>
     <canvas id="lineCanvas" class="lineCanvas"></canvas>
-    <img id="rodImage" class="rodImage" src="../../images/tsurizao.png" alt="rod" draggable="false">
 
     <div id="ukiStage" class="ukiStage" aria-hidden="true">
       <canvas id="ukiCanvas"></canvas>
@@ -32,6 +32,8 @@
     <button id="castButton" class="castButton" type="button" aria-label="Cast">
       <img src="../images/cast_button.png" alt="">
     </button>
+    <button id="aimLeftButton" class="aimButton aimLeft" type="button" aria-label="Left">‹</button>
+    <button id="aimRightButton" class="aimButton aimRight" type="button" aria-label="Right">›</button>
 
     <div id="reelZone" class="reelZone" aria-label="Reel">
       <div class="reelUnit">
@@ -60,6 +62,6 @@
     </div>
   </section>
 </main>
-<script type="module" src="rodAndUkiPrototype.js?v=20260706-rod-uki1"></script>
+<script type="module" src="rodAndUkiPrototype.js?v=20260706-rod-three1"></script>
 </body>
 </html>

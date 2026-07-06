@@ -6,6 +6,22 @@ const THREE_URLS=[
 
 const state={
   panel:null,
+  rodCanvas:null,
+  rodRenderer:null,
+  rodScene:null,
+  rodCamera:null,
+  rodRoot:null,
+  rodSegments:[],
+  rodGuides:[],
+  rodHandle:null,
+  rodReady:false,
+  rodRenderScale:.5,
+  segmentCount:14,
+  segmentLength:32,
+  currentAimAngle:0,
+  targetAimAngle:0,
+  lastAimTime:0,
+  aimHold:0,
   lineCanvas:null,
   lineCtx:null,
   ukiCanvas:null,
@@ -52,6 +68,7 @@ function withTimeout(promise,ms,message){
 
 function init(){
   state.panel=document.getElementById('viewerPanel');
+  state.rodCanvas=document.getElementById('rodCanvas');
   state.lineCanvas=document.getElementById('lineCanvas');
   state.lineCtx=state.lineCanvas?.getContext('2d');
   state.ukiCanvas=document.getElementById('ukiCanvas');
@@ -63,11 +80,16 @@ function init(){
 }
 
 function initControls(){
-  bindSlider('aimSlider','aimValue',(value)=>{state.aimPercent=value;});
+  bindSlider('aimSlider','aimValue',(value)=>{
+    state.aimPercent=value;
+    state.targetAimAngle=getAimAngle();
+  });
   bindSlider('distanceSlider','distanceValue',(value)=>{state.distancePercent=value;});
   bindSlider('scaleSlider','scaleValue',(value)=>{state.scalePercent=value;applyUkiScale();});
   document.getElementById('modeButton')?.addEventListener('click',toggleMode);
   document.getElementById('biteButton')?.addEventListener('click',toggleBite);
+  bindAimButton('aimLeftButton',-1);
+  bindAimButton('aimRightButton',1);
   syncControls();
 }
 
@@ -83,8 +105,34 @@ function bindSlider(sliderId,valueId,apply){
   });
 }
 
+function bindAimButton(id,direction){
+  const button=document.getElementById(id);
+  if(!button)return;
+  const start=(event)=>{
+    event.preventDefault();
+    state.aimHold=direction;
+    button.classList.add('is-held');
+    nudgeAim(direction*5);
+  };
+  const stop=()=>{
+    if(state.aimHold===direction)state.aimHold=0;
+    button.classList.remove('is-held');
+  };
+  button.addEventListener('pointerdown',start);
+  button.addEventListener('pointerup',stop);
+  button.addEventListener('pointercancel',stop);
+  button.addEventListener('pointerleave',stop);
+  button.addEventListener('click',(event)=>event.preventDefault());
+}
+
+function nudgeAim(delta){
+  setAimPercent(state.aimPercent+delta);
+}
+
 function syncControls(){
   state.aimPercent=Number(document.getElementById('aimSlider')?.value||50);
+  state.currentAimAngle=getAimAngle();
+  state.targetAimAngle=getAimAngle();
   state.distancePercent=Number(document.getElementById('distanceSlider')?.value||62);
   state.scalePercent=Number(document.getElementById('scaleSlider')?.value||42);
   setBiteState(false);
@@ -100,6 +148,7 @@ async function bootUki(){
     }
     setLoadStatus('Three.js 読み込み中...');
     THREE=await loadThree();
+    initThreeRod();
     initThreeUki();
   }catch(err){
     console.error(err);
@@ -128,6 +177,65 @@ function initThreeUki(){
   applyUkiScale();
   setLoadStatus('竿角度・投げ先・ウキサイズを調整できます');
   requestAnimationFrame(animateThree);
+}
+
+function initThreeRod(){
+  if(!state.rodCanvas||!THREE)return;
+  state.rodScene=new THREE.Scene();
+  state.rodCamera=new THREE.OrthographicCamera(0,1,1,0,-1000,1000);
+  state.rodRenderer=new THREE.WebGLRenderer({
+    canvas:state.rodCanvas,
+    alpha:true,
+    antialias:false,
+    powerPreference:'high-performance'
+  });
+  state.rodRenderer.setPixelRatio(1);
+  state.rodRenderer.outputColorSpace=THREE.SRGBColorSpace;
+  state.rodScene.add(new THREE.AmbientLight(0x6d7280,1.75));
+  const key=new THREE.DirectionalLight(0xffdf9c,2.1);
+  key.position.set(-2,3,6);
+  state.rodScene.add(key);
+  const fill=new THREE.DirectionalLight(0x4b8fcf,.75);
+  fill.position.set(3,1,4);
+  state.rodScene.add(fill);
+  state.rodRoot=new THREE.Group();
+  state.rodScene.add(state.rodRoot);
+  buildRod();
+  state.rodReady=true;
+  resizeRodRenderer();
+  updateLayout();
+}
+
+function buildRod(){
+  if(!THREE||!state.rodRoot)return;
+  state.rodSegments=[];
+  state.rodGuides=[];
+  const rodMat=new THREE.MeshLambertMaterial({color:0xf4f2e8,flatShading:true});
+  const wrapMat=new THREE.MeshLambertMaterial({color:0xdff8ff,flatShading:true});
+  const handleMat=new THREE.MeshLambertMaterial({color:0x392617,flatShading:true});
+
+  for(let i=0;i<state.segmentCount;i++){
+    const t=i/(state.segmentCount-1);
+    const radius=THREE.MathUtils.lerp(6.5,2.4,t);
+    const geo=new THREE.CylinderGeometry(radius*.75,radius,state.segmentLength,6,1,false);
+    geo.rotateZ(Math.PI/2);
+    const mesh=new THREE.Mesh(geo,rodMat);
+    mesh.matrixAutoUpdate=false;
+    state.rodRoot.add(mesh);
+    state.rodSegments.push(mesh);
+    if(i%3===1||i===state.segmentCount-1){
+      const guide=new THREE.Mesh(new THREE.TorusGeometry(radius*1.35,radius*.16,4,6),wrapMat);
+      guide.rotation.y=Math.PI/2;
+      guide.matrixAutoUpdate=false;
+      state.rodRoot.add(guide);
+      state.rodGuides.push({mesh:guide,index:i,offset:state.segmentLength*.38});
+    }
+  }
+
+  state.rodHandle=new THREE.Mesh(new THREE.CylinderGeometry(9,12,46,6,1,false),handleMat);
+  state.rodHandle.rotation.z=Math.PI/2;
+  state.rodHandle.matrixAutoUpdate=false;
+  state.rodRoot.add(state.rodHandle);
 }
 
 function initFallbackUki(message){
@@ -197,9 +305,29 @@ function resize(){
   state.size={width:rect.width,height:rect.height,dpr};
   state.lineCanvas.width=Math.max(1,Math.floor(rect.width*dpr));
   state.lineCanvas.height=Math.max(1,Math.floor(rect.height*dpr));
+  resizeRodRenderer();
   resizeUkiRenderer();
   resizeFallbackUki();
   updateLayout();
+}
+
+function resizeRodRenderer(){
+  if(!state.rodCanvas)return;
+  const {width,height}=state.size;
+  const renderWidth=Math.max(1,Math.floor(width*state.rodRenderScale));
+  const renderHeight=Math.max(1,Math.floor(height*state.rodRenderScale));
+  state.rodCanvas.width=renderWidth;
+  state.rodCanvas.height=renderHeight;
+  state.rodCanvas.style.width=`${width}px`;
+  state.rodCanvas.style.height=`${height}px`;
+  if(!state.rodReady||!state.rodRenderer||!state.rodCamera)return;
+  state.rodRenderer.setSize(renderWidth,renderHeight,false);
+  state.rodCamera.left=0;
+  state.rodCamera.right=width;
+  state.rodCamera.top=0;
+  state.rodCamera.bottom=height;
+  state.rodCamera.updateProjectionMatrix();
+  updateRodMesh(true);
 }
 
 function resizeUkiRenderer(){
@@ -227,8 +355,7 @@ function updateLayout(){
     state.ukiStage.style.left=`${point.x}px`;
     state.ukiStage.style.top=`${point.y}px`;
   }
-  const rod=document.getElementById('rodImage');
-  if(rod)rod.style.setProperty('--rodrot',`${getAimAngle()*18-10}deg`);
+  updateRodMesh(true);
   drawLine();
 }
 
@@ -262,6 +389,16 @@ function getAimAngle(){
   return (clamp(state.aimPercent,0,100)-50)/50;
 }
 
+function setAimPercent(value){
+  state.aimPercent=clamp(value,0,100);
+  state.targetAimAngle=getAimAngle();
+  const slider=document.getElementById('aimSlider');
+  const label=document.getElementById('aimValue');
+  if(slider)slider.value=String(Math.round(state.aimPercent));
+  if(label)label.textContent=`${Math.round(state.aimPercent)}%`;
+  updateLayout();
+}
+
 function basePoint(){
   const {width,height}=state.size;
   const action=document.getElementById(state.showReel?'reelZone':'castButton')?.getBoundingClientRect();
@@ -276,12 +413,12 @@ function basePoint(){
 }
 
 function curvePoint(n){
-  const segmentCount=14;
-  const segmentLength=32;
+  const segmentCount=state.segmentCount;
+  const segmentLength=state.segmentLength;
   const base=basePoint();
   const t=n/segmentCount;
   const len=segmentLength*segmentCount;
-  const aim=getAimAngle();
+  const aim=state.rodReady?state.currentAimAngle:state.targetAimAngle;
   const bend=5+50*1.35;
   const wobble=Math.sin(t*Math.PI*1.25)*3;
   const upright=-len*.86*t;
@@ -294,12 +431,55 @@ function curvePoint(n){
 }
 
 function getTip(){
-  return curvePoint(14);
+  return curvePoint(state.segmentCount);
+}
+
+function updateRodMesh(force=false){
+  if(!state.rodReady||!THREE||!state.rodRenderer||!state.rodScene||!state.rodCamera)return;
+  const now=performance.now();
+  const dt=state.lastAimTime?Math.min(.05,(now-state.lastAimTime)/1000):.016;
+  state.lastAimTime=now;
+  const ease=force?1:(1-Math.exp(-dt/.22));
+  state.currentAimAngle+=(state.targetAimAngle-state.currentAimAngle)*ease;
+
+  for(let i=0;i<state.segmentCount;i++){
+    const a=vectorFromPoint(curvePoint(i));
+    const b=vectorFromPoint(curvePoint(i+1));
+    const mid=a.clone().add(b).multiplyScalar(.5);
+    const dir=b.clone().sub(a).normalize();
+    const quat=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0),dir);
+    const mesh=state.rodSegments[i];
+    mesh.position.copy(mid);
+    mesh.quaternion.copy(quat);
+    mesh.updateMatrix();
+  }
+
+  for(const guide of state.rodGuides){
+    const p=vectorFromPoint(curvePoint(guide.index+guide.offset/state.segmentLength));
+    const n=vectorFromPoint(curvePoint(Math.min(state.segmentCount,guide.index+1+guide.offset/state.segmentLength)));
+    const dir=n.sub(p).normalize();
+    const quat=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0),dir);
+    guide.mesh.position.copy(p);
+    guide.mesh.quaternion.copy(quat);
+    guide.mesh.updateMatrix();
+  }
+
+  const base=basePoint();
+  if(state.rodHandle){
+    state.rodHandle.position.set(base.x+16,base.y+8,0);
+    state.rodHandle.updateMatrix();
+  }
+  state.rodRenderer.render(state.rodScene,state.rodCamera);
+}
+
+function vectorFromPoint(point){
+  return new THREE.Vector3(point.x,point.y,0);
 }
 
 function drawLine(){
   const ctx=state.lineCtx;
   if(!ctx)return;
+  updateRodMesh();
   const {width,height,dpr}=state.size;
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,width,height);
@@ -368,6 +548,11 @@ function updateReel(dt){
   handle.style.transform=`translate(-50%,-50%) rotate(${state.reelAngle+Math.PI/2}rad)`;
 }
 
+function updateAimHold(dt){
+  if(!state.aimHold)return;
+  setAimPercent(state.aimPercent+state.aimHold*dt*44);
+}
+
 function applyUkiScale(){
   const scale=state.scalePercent/100;
   if(state.uki){
@@ -394,6 +579,9 @@ function updateUkiMotion(dt,elapsed){
 function animateThree(){
   const dt=Math.min(.05,state.clock.getDelta());
   const elapsed=state.clock.elapsedTime;
+  updateAimHold(dt);
+  updateRodMesh();
+  drawLine();
   updateUkiMotion(dt,elapsed);
   updateReel(dt);
   state.renderer.render(state.scene,state.camera);
@@ -402,6 +590,9 @@ function animateThree(){
 
 function animateFallback(now){
   const elapsed=(now-state.fallbackStart)/1000;
+  updateAimHold(.016);
+  updateRodMesh();
+  drawLine();
   updateReel(.016);
   drawFallbackUki(elapsed);
   requestAnimationFrame(animateFallback);
