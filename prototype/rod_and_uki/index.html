@@ -4,15 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Daphne Fishing Rod and Uki Prototype</title>
-<link rel="stylesheet" href="style.css?v=20260706-rod-three1">
+<link rel="stylesheet" href="style.css?v=20260706-game-bg1">
 </head>
 <body>
 <main class="prototypeShell">
   <section id="viewerPanel" class="viewerPanel" aria-label="Rod and polygon uki prototype">
     <div class="gameBackdrop" aria-hidden="true">
-      <div class="bgBack"></div>
-      <div class="bgTree"></div>
-      <div class="waterScroll"></div>
+      <div id="waterSurface" class="waterSurface">
+        <div class="waterSurfaceTile"></div>
+        <div class="waterSurfaceTile is-mirror"></div>
+        <div class="waterSurfaceTile"></div>
+      </div>
+      <div class="bg"></div>
+      <canvas id="treeWindCanvas" class="treeWindCanvas"></canvas>
       <div class="sceneShade"></div>
     </div>
 
@@ -62,6 +66,6 @@
     </div>
   </section>
 </main>
-<script type="module" src="rodAndUkiPrototype.js?v=20260706-rod-three1"></script>
+<script type="module" src="rodAndUkiPrototype.js?v=20260706-game-bg1"></script>
 </body>
 </html>

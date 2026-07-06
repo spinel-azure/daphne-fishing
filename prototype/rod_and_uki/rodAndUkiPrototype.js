@@ -6,6 +6,15 @@ const THREE_URLS=[
 
 const state={
   panel:null,
+  waterRoot:null,
+  waterTiles:[],
+  waterWidth:1,
+  waterOffset:0,
+  treeCanvas:null,
+  treeCtx:null,
+  treeImage:null,
+  treeLeafCanvas:null,
+  treeReady:false,
   rodCanvas:null,
   rodRenderer:null,
   rodScene:null,
@@ -68,15 +77,61 @@ function withTimeout(promise,ms,message){
 
 function init(){
   state.panel=document.getElementById('viewerPanel');
+  state.waterRoot=document.getElementById('waterSurface');
+  state.waterTiles=state.waterRoot?[...state.waterRoot.querySelectorAll('.waterSurfaceTile')]:[];
+  state.treeCanvas=document.getElementById('treeWindCanvas');
+  state.treeCtx=state.treeCanvas?.getContext('2d');
   state.rodCanvas=document.getElementById('rodCanvas');
   state.lineCanvas=document.getElementById('lineCanvas');
   state.lineCtx=state.lineCanvas?.getContext('2d');
   state.ukiCanvas=document.getElementById('ukiCanvas');
   state.ukiStage=document.getElementById('ukiStage');
   initControls();
+  initTreeWind();
   window.addEventListener('resize',resize);
   resize();
   bootUki();
+}
+
+function initTreeWind(){
+  if(!state.treeCanvas||!state.treeCtx)return;
+  state.treeCtx.imageSmoothingEnabled=false;
+  state.treeImage=new Image();
+  state.treeImage.src='../../images/bg.png';
+  state.treeImage.onload=()=>{
+    buildLeafMask();
+    state.treeReady=true;
+    resize();
+  };
+}
+
+function buildLeafMask(){
+  const img=state.treeImage;
+  if(!img)return;
+  const src=document.createElement('canvas');
+  src.width=img.naturalWidth;
+  src.height=img.naturalHeight;
+  const ctx=src.getContext('2d');
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(img,0,0);
+  const data=ctx.getImageData(0,0,src.width,src.height);
+  const pixels=data.data;
+  const maxLeafY=src.height*.42;
+
+  for(let y=0;y<src.height;y++){
+    for(let x=0;x<src.width;x++){
+      const i=(y*src.width+x)*4;
+      const r=pixels[i];
+      const g=pixels[i+1];
+      const b=pixels[i+2];
+      const a=pixels[i+3];
+      const greenLeaf=y<maxLeafY&&a>180&&g>55&&g>r*1.08&&g>b*1.08&&r<100&&b<100;
+      if(!greenLeaf)pixels[i+3]=0;
+    }
+  }
+
+  ctx.putImageData(data,0,0);
+  state.treeLeafCanvas=src;
 }
 
 function initControls(){
@@ -305,10 +360,79 @@ function resize(){
   state.size={width:rect.width,height:rect.height,dpr};
   state.lineCanvas.width=Math.max(1,Math.floor(rect.width*dpr));
   state.lineCanvas.height=Math.max(1,Math.floor(rect.height*dpr));
+  resizeWater(rect.width,rect.height);
+  resizeTreeWind(rect.width,rect.height);
   resizeRodRenderer();
   resizeUkiRenderer();
   resizeFallbackUki();
   updateLayout();
+}
+
+function resizeWater(width,height){
+  if(!state.waterRoot)return;
+  state.waterWidth=Math.max(1,Math.ceil(width));
+  state.waterRoot.style.height=`${Math.ceil(height)}px`;
+  state.waterTiles.forEach((tile)=>{
+    tile.style.width=`${state.waterWidth+2}px`;
+    tile.style.height=`${Math.ceil(height)}px`;
+  });
+  drawWater();
+}
+
+function resizeTreeWind(width,height){
+  if(!state.treeCanvas)return;
+  const w=Math.max(1,Math.floor(width));
+  const h=Math.max(1,Math.floor(height));
+  state.treeCanvas.width=w;
+  state.treeCanvas.height=h;
+  state.treeCanvas.style.width=`${w}px`;
+  state.treeCanvas.style.height=`${h}px`;
+  if(state.treeCtx)state.treeCtx.imageSmoothingEnabled=false;
+}
+
+function updateWater(dt){
+  if(!state.waterTiles.length)return;
+  state.waterOffset=(state.waterOffset+8*dt)%(state.waterWidth*2);
+  drawWater();
+}
+
+function drawWater(){
+  if(!state.waterTiles.length)return;
+  const x=-Math.round(state.waterOffset);
+  state.waterTiles.forEach((tile,index)=>{
+    const mirror=tile.classList.contains('is-mirror');
+    const tx=x+state.waterWidth*(mirror?index+1:index)+(mirror?2:0);
+    tile.style.transform=`translate3d(${tx}px,0,0)${mirror?' scaleX(-1)':''}`;
+  });
+}
+
+function updateTreeWind(now){
+  if(!state.treeReady||!state.treeCtx||!state.treeLeafCanvas)return;
+  const ctx=state.treeCtx;
+  const img=state.treeLeafCanvas;
+  const w=state.treeCanvas.width;
+  const h=state.treeCanvas.height;
+  const sourceW=img.width;
+  const sourceH=img.height;
+  const scale=Math.max(w/sourceW,h/sourceH);
+  const drawW=sourceW*scale;
+  const drawH=sourceH*scale;
+  const dx=(w-drawW)/2;
+  const dy=(h-drawH)/2;
+  const t=now/1000*.9;
+  const sliceH=2;
+  const startY=Math.floor(h*.12);
+  const endY=Math.floor(h*.45);
+
+  ctx.clearRect(0,0,w,h);
+  ctx.imageSmoothingEnabled=false;
+  for(let y=startY;y<endY;y+=sliceH){
+    const sy=(y-dy)/scale;
+    if(sy<0||sy>=sourceH)continue;
+    const sh=Math.min(sliceH/scale,sourceH-sy);
+    const sway=Math.round(Math.sin(t+y*.045)*2.2+Math.sin(t*1.7+y*.022)*.8);
+    ctx.drawImage(img,0,sy,sourceW,sh,dx+sway,y,drawW,sliceH);
+  }
 }
 
 function resizeRodRenderer(){
@@ -579,6 +703,8 @@ function updateUkiMotion(dt,elapsed){
 function animateThree(){
   const dt=Math.min(.05,state.clock.getDelta());
   const elapsed=state.clock.elapsedTime;
+  updateWater(dt);
+  updateTreeWind(performance.now());
   updateAimHold(dt);
   updateRodMesh();
   drawLine();
@@ -590,6 +716,8 @@ function animateThree(){
 
 function animateFallback(now){
   const elapsed=(now-state.fallbackStart)/1000;
+  updateWater(.016);
+  updateTreeWind(now);
   updateAimHold(.016);
   updateRodMesh();
   drawLine();
